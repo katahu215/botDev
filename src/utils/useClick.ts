@@ -21,10 +21,14 @@ type ContextOptions = {
 
 const fight_selector = "#divFightI .moves .divMoveInfo.clickable";
 
+const guard = async (unlock = false) => {
+  if (!sessionStore.isRunning && !unlock) return false;
+  return await solveCaptcha();
+};
+
 export const ActionClick = {
   async handleClick({ selector, index, unlock }: ClickOptions) {
-    if (!sessionStore.isRunning && !unlock) return false;
-    if (!(await solveCaptcha())) return false;
+    if (await guard(unlock)) return false;
 
     const i = index ?? null;
 
@@ -38,7 +42,7 @@ export const ActionClick = {
   },
 
   async handleClickAttack(key: number, priority?: boolean) {
-    if (!sessionStore.isRunning || !(await solveCaptcha())) return false;
+    if (await guard()) return false;
 
     const index = key > 0 ? key - 1 : 0;
 
@@ -49,7 +53,7 @@ export const ActionClick = {
   },
 
   async handleContextClick({ searchText, selectors, unlock }: ContextOptions) {
-    if (!sessionStore.isRunning && !unlock) return false;
+    if (await guard(unlock)) return false;
 
     const selector = selectors ?? ".divContext .divElements .divElement.clickable";
 
@@ -64,7 +68,7 @@ export const ActionClick = {
   },
 
   async handleHotkey(key: number) {
-    if (!sessionStore.isRunning || !(await solveCaptcha())) return false;
+    if (await guard()) return false;
 
     // 100 кнопка E
     try {
