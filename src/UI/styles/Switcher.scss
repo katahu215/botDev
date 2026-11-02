@@ -1,0 +1,71 @@
+.Switcher {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: space-between;
+  border-radius: 0.5rem;
+
+  .Button:hover {
+    background-color: transparent !important;
+  }
+  &:hover {
+    background-color: var(--color-hover);
+  }
+
+  input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+    z-index: var(--z-below, -1);
+
+    &:checked + .widget {
+      background-color: var(--color-prime);
+
+      &::after {
+        border-color: var(--color-prime);
+        transform: translateX(1.125rem);
+      }
+    }
+
+    &:focus-visible + .widget {
+      outline: 2px solid var(--color-prime);
+      outline-offset: 2px;
+    }
+
+    &:disabled + .widget {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    &:hover {
+      background-color: var(--color-hover);
+    }
+  }
+
+  .widget {
+    background-color: var(--color-hover);
+    border-radius: 0.5rem;
+    width: 2rem;
+    height: 8px;
+    transition: background-color 0.2s ease;
+
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+
+    &::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      background-color: var(--color-bg);
+      border: 0.125rem solid var(--color-hover);
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
+    }
+  }
+}

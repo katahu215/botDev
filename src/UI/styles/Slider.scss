@@ -1,0 +1,80 @@
+.Slider {
+  position: relative;
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  contain: layout paint;
+
+  .slide {
+    width: 100%;
+
+    &.entering,
+    &.leaving {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      will-change: transform;
+      border-radius: 0.5rem;
+    }
+  }
+
+  &:not(.forward):not(.backward) {
+    .slide.entering {
+      position: relative;
+      will-change: auto;
+    }
+  }
+
+  &.forward .slide {
+    &.entering {
+      animation: slideInFromRight 0.3s forwards cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    &.leaving {
+      animation: slideOutToLeft 0.3s forwards cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+
+  &.backward .slide {
+    &.entering {
+      animation: slideInFromLeft 0.3s forwards cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    &.leaving {
+      animation: slideOutToRight 0.3s forwards cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+}
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}

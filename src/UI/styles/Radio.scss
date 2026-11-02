@@ -1,0 +1,55 @@
+.Radio {
+  display: flex;
+  flex-direction: column;
+
+  .radio-label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+    padding: 0.25rem;
+    border-radius: 0.5rem;
+
+    &:hover {
+      background-color: var(--color-hover);
+    }
+
+    .radio-input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .radio-custom {
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 50%;
+      background-color: transparent;
+      display: inline-block;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .radio-input:checked + .radio-custom {
+      border-color: var(--color-prime);
+      background-color: transparent;
+    }
+
+    .radio-input:checked + .radio-custom::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-prime);
+      border-radius: 50%;
+      transition: all 0.15s ease;
+    }
+  }
+}

@@ -1,0 +1,19 @@
+.Authorization {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+
+  .auth-error {
+    font-size: var(--font-x-small);
+    color: red;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    // height: 30px;
+  }
+
+  .auth-buttons {
+    display: flex;
+  }
+}

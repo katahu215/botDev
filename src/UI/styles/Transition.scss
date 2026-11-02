@@ -1,0 +1,38 @@
+.Transition {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  &.open {
+    opacity: 1;
+  }
+
+  &.close {
+    opacity: 0;
+  }
+
+  // &.update {
+  //   max-width: 1505px;
+  //   transition:
+  //     opacity 0.25s ease,
+  //     max-width 0.25s ease;
+
+  //   &:not(.open) {
+  //     max-width: 0;
+  //   }
+  // }
+
+  &.modal {
+    transform: translate3d(0, -1rem, 0);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+
+    &.open {
+      transform: translate3d(0, 0, 0);
+    }
+
+    &.close {
+      transform: translate3d(0, 1rem, 0);
+    }
+  }
+}
