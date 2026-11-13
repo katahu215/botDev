@@ -85,6 +85,7 @@ button {
   box-shadow: 0 1px 5px -1px rgb(0, 0, 0, 0.36);
   opacity: 0;
   pointer-events: none;
+  z-index: 2000;
 
   transition:
     transform 0.25s ease,
@@ -134,5 +135,24 @@ button {
   .Item {
     padding: 0.125rem;
     font-size: var(--font-x-small);
+  }
+}
+
+@media (max-width: 768px) {
+  .navigation-menu {
+    flex-direction: column;
+    left: auto;
+    right: 0;
+    transform: scale(0.4);
+    transform-origin: center;
+    opacity: 0;
+    transition:
+      transform 0.25s ease,
+      opacity 0.25s ease;
+
+    &.open {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 }

@@ -3,7 +3,7 @@ import PocketBase from "pocketbase";
 import { modalService } from "../UI/Component/modalService";
 import AuthorizationMenu from "../UI/Menu/AuthorizationMenu";
 import defaultMonsters from "../data/monster_all.json";
-import { defaultSettings } from "./store";
+import { defaultSettings, setSessionStore } from "./store";
 import { setMonstersStore, setSettingsStore } from "./store";
 
 export const pb = new PocketBase("https://pbhelperskatan.duckdns.org:8443/");
@@ -25,6 +25,7 @@ export async function validateSession() {
 
   try {
     const userRecord = await pb.collection("users").getOne(pb.authStore.record.id);
+    setSessionStore("userIdPocket", userRecord.id);
     syncData(userRecord);
   } catch (err) {
     pb.authStore.clear();
@@ -69,12 +70,7 @@ const syncData = (record: any) => {
     const userSettings = record.setting;
     const defaultKeys = Object.keys(defaultSettings);
 
-    const mergedSettings = Object.fromEntries(
-      defaultKeys.map((key) => [
-        key,
-        userSettings[key] !== undefined ? userSettings[key] : (defaultSettings as any)[key],
-      ]),
-    );
+    const mergedSettings = Object.fromEntries(defaultKeys.map((key) => [key, userSettings[key] !== undefined ? userSettings[key] : (defaultSettings as any)[key]]));
 
     setSettingsStore(mergedSettings);
 
@@ -92,8 +88,3 @@ const syncData = (record: any) => {
     setMonstersStore(record.monster);
   }
 };
-
-// const syncData = (record: any) => {
-//   if (record.setting) setSettingsStore(record.setting);
-//   if (record.monster) setMonstersStore(record.monster);
-// };

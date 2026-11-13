@@ -1,5 +1,5 @@
 import { mainController } from "../game/mainContoller";
-import { catchCandy, payHalloween } from "../testFunction/testUtils";
+import { catchCandy, payHalloween } from "../game/halloween";
 import { informer } from "./Notification";
 import { setSessionStore, sessionStore, settingsStore } from "./store";
 
@@ -139,6 +139,7 @@ const reaction: Record<string, (data: any) => void> = {
       updateDataFight(data);
       if (!data.object.fight.is_ended) mainController();
     }
+
     if (data.object?.events?.halloween?.trick && settingsStore.halloween.usePay) payHalloween();
     if (data.object?.events?.halloween?.candy && settingsStore.halloween.useCandy) catchCandy();
   },

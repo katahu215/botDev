@@ -48,7 +48,7 @@ export const trade = async () => {
   await toggleTeam(false);
 };
 
-export const toggleTeam = async (close?: boolean) => {
+const toggleTeam = async (close?: boolean) => {
   const waiter = waitForResponse("/do/pokes/load/team");
 
   let button = document.querySelectorAll(".divDockIn .icon")[1] as HTMLElement;
@@ -67,6 +67,7 @@ export const toggleTeam = async (close?: boolean) => {
 
 let timeoutId: number | null = null;
 
+// Переделать полностью тут жесткий1 баг с кликами
 export const autoItem = async () => {
   if (timeoutId !== null) {
     clearTimeout(timeoutId);
@@ -109,7 +110,7 @@ export const autoItem = async () => {
 
       waiter = waitForResponse("/do/items/use");
 
-      if (!(await ActionClick.handleContextClick({ searchText: "Использовать", selectors: ".hint .hintmenu .button" }))) {
+      if (!(await ActionClick.handleContextClick({ searchText: "Использовать", selector: ".hint .hintmenu .button" }))) {
         await delay(1000, 1000);
         continue;
       }
@@ -138,16 +139,5 @@ export const autoItem = async () => {
     informer.error("Ошибка", `Ошибка при использовании авто-предмета: ${error}`);
   } finally {
     await toggleSwitch(true);
-  }
-};
-
-export const payHalloween = async () => {
-  await ActionClick.handleContextClick({ searchText: "Отдать", selectors: ".divHalloweenTrick .divHalloweenTrickButtons .button.gray.withtext", unlock: true });
-};
-export const catchCandy = async () => {
-  // await delayInterface();
-  for (let i = 0; i < 8; i++) {
-    if (!document.querySelector(".divHalloweenCandy")) return;
-    await ActionClick.handleClick({ selector: ".divHalloweenCandy", unlock: true });
   }
 };

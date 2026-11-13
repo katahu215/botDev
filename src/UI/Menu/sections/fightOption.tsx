@@ -3,7 +3,6 @@ import Button from "../../Component/Button";
 import Confirm from "../../Component/Confirm";
 import { modalService } from "../../Component/modalService";
 import RadioGroup from "../../Component/Radio";
-import Switcher from "../../Component/Switcher";
 
 export const getFightOptions = (pushScreen: (id: number) => void) => [
   {
@@ -16,10 +15,6 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
             Выбор атаки
           </Button>
         </div>
-        <div class="List">
-          <Switcher title="Лимит PP" checked={settingsStore.useLimitPp} onChange={(val) => appService.updateSettings("useLimitPp", val)} class="Item" />
-        </div>
-        <div class="secondary-text">При отключении игнорирует нехватку «pp» после полного исчерпания у всех атак.</div>
 
         <div class="List">
           <Button class="Item" onClick={() => pushScreen(3)} iconName="flag">
@@ -33,9 +28,12 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
     id: 2,
     title: "Атаки",
     children: (
-      <div class="List">
-        <RadioGroup options={optionsRadioGroup.attackSkill} value={settingsStore.attackSkill} name="attackSkill" onChange={(val) => appService.updateSettings("attackSkill", val)} />
-      </div>
+      <>
+        <div class="List">
+          <RadioGroup options={optionsRadioGroup.attackSkill} value={settingsStore.attackSkill} name="attackSkill" onChange={(val) => appService.updateSettings("attackSkill", val)} />
+        </div>
+        <div class="secondary-text">При выборе «Все» используются все доступные атаки для убийства.</div>
+      </>
     ),
   },
   {
@@ -77,7 +75,7 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
     title: "Атаки",
     children: (
       <div class="List">
-        <RadioGroup options={optionsRadioGroup.attackSkill} value={settingsStore.finishSkill} name="finishSkill" onChange={(val) => appService.updateSettings("finishSkill", val)} />
+        <RadioGroup options={optionsRadioGroup.finishSkill} value={settingsStore.finishSkill} name="finishSkill" onChange={(val) => appService.updateSettings("finishSkill", val)} />
       </div>
     ),
   },

@@ -3,10 +3,12 @@ import Button from "./UI/Component/Button";
 import NavigationMenu from "./UI/Menu/Navigation";
 import ModalProvider from "./UI/Component/modalService";
 import { isAuthorized, validateSession } from "./utils/auth";
+import { setSessionStore } from "./utils/store";
 
 function App() {
   const [open, setOpen] = createSignal(false);
   const handleOpen = () => setOpen(!open());
+  setSessionStore("isMobile", /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   onMount(() => {
     validateSession();

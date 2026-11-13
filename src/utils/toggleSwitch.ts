@@ -1,7 +1,15 @@
 import { delayInterface } from "./sleep";
+import { sessionStore } from "./store";
 
 export const toggleSwitch = async (pressed: boolean) => {
-  const button = document.querySelector<HTMLElement>("#divInputButtons .btnSwitchWilds");
+  let button = null;
+
+  if (sessionStore.isMobile) {
+    button = document.querySelector<HTMLElement>("#divDockUpper .btnSwitchWilds");
+  } else {
+    button = document.querySelector<HTMLElement>("#divInputButtons .btnSwitchWilds");
+  }
+
   const isPressed = button?.classList.contains("pressed") ?? false;
 
   await delayInterface();

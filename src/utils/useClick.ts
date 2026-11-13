@@ -1,81 +1,63 @@
-import { informer } from "./Notification";
 import { solveCaptcha } from "./solveCaptcha";
 import { sessionStore } from "./store";
 
 type ClickOptions = {
-  selector: string;
   index?: number;
-  unlock?: boolean;
+  selector: string;
+  force?: boolean; /// разрешает клик если бот неактивен
 };
-
-// type AttackOptions = {
-//   key: number;
-//   priority?: boolean;
-// };
-
 type ContextOptions = {
   searchText: string;
-  selectors?: string;
-  unlock?: boolean;
+  selector?: string;
+  force?: boolean;
 };
 
 const fight_selector = "#divFightI .moves .divMoveInfo.clickable";
-
-const guard = async (unlock = false) => {
-  if (!sessionStore.isRunning && !unlock) return false;
-  return await solveCaptcha();
-};
+const win = window as any;
 
 export const ActionClick = {
-  async handleClick({ selector, index, unlock }: ClickOptions) {
-    if (await guard(unlock)) return false;
-
-    const i = index ?? null;
+  async handleClick({ selector, index = 0, force }: ClickOptions) {
+    if (!(await guard(force))) return false;
 
     try {
-      const success = await (window as any).ssevsType.triggerClick(selector, i);
-      return success;
+      return await win.ssevsType.triggerClick(selector, index);
     } catch (error) {
       console.error("Ошибка клика по селектору:", error);
       return false;
     }
   },
-
   async handleClickAttack(key: number, priority?: boolean) {
-    if (await guard()) return false;
-
     const index = key > 0 ? key - 1 : 0;
 
     if (priority) return await this.handleClick({ selector: fight_selector, index }); // это что бы не багался меню атаки при каче
 
-    return await this.handleHotkey(key);
-    return await ActionClick.handleClick({ selector: fight_selector, index });
+    // if (sessionStore.isMobile) return await this.androidClick(fight_selector, key);
+
+    return await this.handleHotkey(index);
   },
+  async handleContextClick({ searchText, selector, force }: ContextOptions) {
+    const selectorTarget = selector ?? ".divContext .divElements .divElement.clickable";
 
-  async handleContextClick({ searchText, selectors, unlock }: ContextOptions) {
-    if (await guard(unlock)) return false;
-
-    const selector = selectors ?? ".divContext .divElements .divElement.clickable";
-
-    const elements = Array.from(document.querySelectorAll<HTMLElement>(selector));
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(selectorTarget));
     const index = elements.findIndex((el) => el.textContent?.trim().includes(searchText));
 
-    if (index === -1) {
-      informer.warning("Ошибка", `Элемент с текстом "${searchText}" не найден`);
-      return false;
-    }
-    return await this.handleClick({ selector, index });
+    if (index === -1) return false;
+
+    return await this.handleClick({ selector: selectorTarget, index, force });
   },
-
   async handleHotkey(key: number) {
-    if (await guard()) return false;
-
+    if (!(await guard())) return false;
     // 100 кнопка E
     try {
-      return await (window as any).ssevsType.triggerHotkey(key);
+      return await win.ssevsType.triggerHotkey(key + 1); // +1 защита от 0 - index атаки приходит 0/4
     } catch (error) {
-      console.error("Ошибка горячей клавиши:", error);
+      console.error("Ошибка горячей клавиши:", `${error}`);
       return false;
     }
   },
+};
+
+const guard = async (force = false) => {
+  if (!sessionStore.isRunning && !force) return false;
+  return await solveCaptcha();
 };

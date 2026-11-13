@@ -14,7 +14,9 @@ export type PokemonMove = {
 
 const ignoreAttack = ["Подставной ход", "Крик банши", "Замедленная бомба", "Крик банши"];
 const isAttackUsable = (attack: PokemonMove, element?: Element) => attack.pp > settingsStore.limitPp && !element?.classList.contains("disabled");
+
 export const findAttack = (target: string | number) => {
+  console.log(target);
   const movesObj = sessionStore.iPoke?.moves ?? {};
   const monsterArray = Object.values(movesObj).filter((m): m is PokemonMove => m !== null);
 
@@ -53,9 +55,8 @@ export const findAttack = (target: string | number) => {
     return true;
   });
 
-  if (!settingsStore.useLimitPp) {
-    attack = monsterArray.find((m) => moveElements[m.num - 1]?.classList.contains("disabled"));
-    return attack && { num: attack.num, pp: 100000, back: false, notFound };
+  if (target === 100) {
+    return (attack && { num: attack.num, pp: 100000, back: false, notFound: false }) || null;
   }
 
   return (attack && { num: attack.num, pp: attack.pp, back: true, notFound }) || null;

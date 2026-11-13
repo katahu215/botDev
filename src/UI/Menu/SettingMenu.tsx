@@ -53,9 +53,9 @@ const TestModal = (props: TestModalProps): JSX.Element => {
             Уведомления
           </Button>
 
-          <Button class="Item" onClick={() => pushScreen(110)} iconName="ghost">
+          {/* <Button class="Item" onClick={() => pushScreen(110)} iconName="ghost">
             Хэллоуин
-          </Button>
+          </Button> */}
         </div>
       ),
     },

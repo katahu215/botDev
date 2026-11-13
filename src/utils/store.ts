@@ -43,7 +43,6 @@ export interface UserSettings {
 
   limitHp: number;
   limitPp: number;
-  useLimitPp: boolean;
   useArenaHeal: boolean;
 
   //
@@ -55,7 +54,9 @@ export interface UserSettings {
 }
 
 export interface GameSessionState {
+  userIdPocket: string;
   isRunning: boolean;
+  isMobile: boolean;
 
   userId: number;
   userName: string;
@@ -72,7 +73,9 @@ export interface GameSessionState {
 }
 
 export const [sessionStore, setSessionStore] = createStore<GameSessionState>({
+  userIdPocket: "",
   isRunning: false,
+  isMobile: false,
 
   userId: 0,
   userName: "",
@@ -126,7 +129,6 @@ export const defaultSettings: UserSettings = {
 
   limitHp: 25,
   limitPp: 0,
-  useLimitPp: true,
   useArenaHeal: false,
 
   //
@@ -147,6 +149,13 @@ export interface RadioOption {
 }
 export const optionsRadioGroup: Record<string, RadioOption[]> = {
   attackSkill: [
+    { value: 1, label: "Атака 1" },
+    { value: 2, label: "Атака 2" },
+    { value: 3, label: "Атака 3" },
+    { value: 4, label: "Атака 4" },
+    { value: 100, label: "Все" },
+  ],
+  finishSkill: [
     { value: 1, label: "Атака 1" },
     { value: 2, label: "Атака 2" },
     { value: 3, label: "Атака 3" },
@@ -298,7 +307,7 @@ export const optionsRadioGroup: Record<string, RadioOption[]> = {
 };
 
 export const isAdmin = createMemo(() => {
-  if (sessionStore.userName === "Бледный Кощей") return true;
+  if (sessionStore.userIdPocket === "hcsrdavsyigv6a7") return true;
   return false;
 });
 

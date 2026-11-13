@@ -15,10 +15,10 @@ export const Surrender = async () => {
   await delayAttack();
 
   const wait = waitForResponse("/do/fight/surrend");
-  await ActionClick.handleContextClick({ searchText: "Сдаться", selectors: "#divFightButtons .button.withtext" });
+  await ActionClick.handleContextClick({ searchText: "Сдаться", selector: "#divFightButtons .button.withtext" });
   await wait;
 
-  await ActionClick.handleContextClick({ searchText: "Закрыть", selectors: "#divFightButtons .button.withtext" });
+  await ActionClick.handleContextClick({ searchText: "Закрыть", selector: "#divFightButtons .button.withtext" });
 
   toggleAutoConfirm();
   return true;
