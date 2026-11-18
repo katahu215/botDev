@@ -5,8 +5,8 @@ import { toggleAutoConfirm } from "../utils/toggleAutoConfirm.ts";
 import { ActionClick } from "../utils/useClick.js";
 import { waitForResponse } from "../utils/websocket.ts";
 import { Surrender } from "./Surrender.ts";
-import { informer } from "../utils/Notification.ts";
 import { toggleSwitch } from "../utils/toggleSwitch.ts";
+import { log } from "../utils/logger.ts";
 
 interface RoutesData {
   [routeName: number]: {
@@ -268,7 +268,7 @@ export const runHeal = async () => {
   const route = routesHeal[sessionStore.location];
   if (!route) {
     if (document.querySelector(".btnLocHeal")) return await ActionClick.handleHotkey(100);
-    return informer.error("Ошибка", "Маршрут отсутствует.");
+    return log("Маршрут отсутствует. Сообщите локацию.");
   }
 
   const goToStep = async (index: number) => {
@@ -311,22 +311,23 @@ const healing = async () => {
   await delayInterface();
 
   let wait = waitForResponse("/do/pc/heal/poke");
-  await ActionClick.handleHotkey(100);
-  await wait;
 
-  return;
+  if (!sessionStore.isMobile) {
+    await ActionClick.handleHotkey(100);
+    return await wait;
+  }
 
-  //  Запасной вариант если кнопки отключены
-  // wait = waitForResponse("/do/pc/heal/load");
-  // await ActionClick.handleClick("#divLocNpc .btnLocHeal");
-  // const result = await wait;
-  // if (result.code === 400) return;
+  //  Мобилльная версия
+  wait = waitForResponse("/do/pc/heal/load");
+  await ActionClick.handleClick({ selector: "#divLocNpc .btnLocHeal" });
+  const result = await wait;
+  if (result.code === 400) return;
+  /// пауза перед кликом на хил
+  await delayGo();
 
-  // /// пауза перед кликом на хил
-
-  // wait = waitForResponse("/do/pc/heal/poke");
-  // await ActionClick.handleContextClick("Лечить всех");
-  // await wait;
+  wait = waitForResponse("/do/pc/heal/poke");
+  await ActionClick.handleContextClick({ searchText: "Лечить всех" });
+  return await wait;
 };
 
 const teleportArea = async (target: string): Promise<boolean | void> => {
@@ -335,23 +336,35 @@ const teleportArea = async (target: string): Promise<boolean | void> => {
 
   for (let i = 0; i < 3; i++) {
     await delayGo();
+
+    if (sessionStore.isMobile) {
+      if (!document.querySelector("#divDock")?.classList.contains("active")) {
+        await ActionClick.handleClick({ selector: "#divDock .btnDockDevice", mobileDocker: true });
+        await delayInterface();
+      }
+    }
+
     let wait = waitForResponse("/do/diary");
-    await ActionClick.handleClick({ selector: ".divDockIn .icon", index: 6 });
+    if (document.querySelectorAll(".divDockIn .icon")[6].classList.contains("active")) {
+      await ActionClick.handleClick({ selector: ".divDockIn .dockitem", index: 6, mobileDocker: true });
+      await delayInterface();
+    }
+    await ActionClick.handleClick({ selector: ".divDockIn .dockitem", index: 6, mobileDocker: true });
     await wait;
 
     wait = waitForResponse("/do/diary/tournaments/load");
-    await ActionClick.handleClick({ selector: ".panel.paneldiary .tabControls div", index: 4 });
+    await ActionClick.handleClick({ selector: ".panel.paneldiary .tabControls div", index: 4, mobileDocker: true });
     await wait;
 
     await delayGo();
 
-    await ActionClick.handleClick({ selector: ".panel.paneldiary .tabContent.tournaments .btnTelep" });
+    await ActionClick.handleClick({ selector: ".panel.paneldiary .tabContent.tournaments .btnTelep", mobileDocker: true });
 
     wait = waitForResponse("/do/loc/teleparena");
 
     await delayGo();
 
-    await ActionClick.handleContextClick({ searchText: `${target}` });
+    await ActionClick.handleContextClick({ searchText: `${target}`, mobileDocker: true });
     const result = await wait;
 
     if (result.code === 400 && !(await Surrender())) {
@@ -376,27 +389,35 @@ const healingArea = async () => {
 
   let wait = waitForResponse("/do/pc/heal/poke");
 
-  await ActionClick.handleHotkey(100);
-  await wait;
+  if (!sessionStore.isMobile) {
+    await ActionClick.handleHotkey(100);
+    await wait;
+
+    await delayGo();
+
+    return teleportArea("Возврат на локацию");
+  }
+
+  //  Запасной вариант если кнопки отключены
+  // wait = waitForResponse("/do/pc/heal/load");
+  await ActionClick.handleClick({ selector: ".divCompetePanel .button.justicon:has(span.icon-more)", mobileDocker: true });
+  // await wait;
 
   await delayGo();
 
-  return teleportArea("Возврат на локацию");
+  wait = waitForResponse("/do/pc/heal/load");
+  await ActionClick.handleContextClick({ searchText: "Лечение монстров", mobileDocker: true });
+  const result = await wait;
+  if (result.code === 400) return teleportArea("Возврат на локацию");
 
-  //  Запасной вариант если кнопки отключены
-  // await ActionClick.handleClick(".divCompetePanel .button.justicon:has(span.icon-more)");
+  await delayGo();
 
-  // wait = waitForResponse("/do/pc/heal/load");
-  // await ActionClick.handleContextClick("Лечение монстров");
-  // const result = await wait;
-  // if (result.code === 400) return teleportArea("Возврат на локацию");
+  wait = waitForResponse("/do/pc/heal/poke");
+  await ActionClick.handleContextClick({ searchText: "Лечить всех", mobileDocker: true });
+  await wait;
 
-  // wait = waitForResponse("/do/pc/heal/poke");
-  // await ActionClick.handleContextClick("Лечить всех");
-  // await wait;
-
-  // teleportArea("Возврат на локацию");
-  // return;
+  teleportArea("Возврат на локацию");
+  return;
 };
 
 const backMonster = async () => {
@@ -413,5 +434,5 @@ const backMonster = async () => {
   }
 
   /// закрыть
-  await ActionClick.handleClick({ selector: ".divDockIn .icon", index: 1 });
+  await ActionClick.handleClick({ selector: ".divDockIn .dockitem", index: 1 });
 };

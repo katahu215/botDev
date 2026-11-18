@@ -1,4 +1,4 @@
-import { autoItem } from "../../../testFunction/testUtils";
+import { autoItem } from "../../../utils/autoItem";
 import { optionsRadioGroup, setSettingsStore, settingsStore } from "../../../utils/store";
 import Button from "../../Component/Button";
 import RadioGroup from "../../Component/Radio";

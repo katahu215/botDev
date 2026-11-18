@@ -1,7 +1,6 @@
 import { createStore, produce } from "solid-js/store";
 import autoMonsterIds from "../data/auto_monster.json";
 import { pb } from "./auth";
-import { createMemo } from "solid-js";
 
 export type Monster = {
   id: number;
@@ -54,7 +53,7 @@ export interface UserSettings {
 }
 
 export interface GameSessionState {
-  userIdPocket: string;
+  role: Record<string, boolean>;
   isRunning: boolean;
   isMobile: boolean;
 
@@ -72,8 +71,13 @@ export interface GameSessionState {
   timerItem: any; // object
 }
 
+export const win = window as any;
+
 export const [sessionStore, setSessionStore] = createStore<GameSessionState>({
-  userIdPocket: "",
+  role: {
+    isAdmin: false,
+    isDev: false,
+  },
   isRunning: false,
   isMobile: false,
 
@@ -306,10 +310,14 @@ export const optionsRadioGroup: Record<string, RadioOption[]> = {
   ],
 };
 
-export const isAdmin = createMemo(() => {
-  if (sessionStore.userIdPocket === "hcsrdavsyigv6a7") return true;
-  return false;
-});
+// export const isAdmin = createMemo(() => {
+//   if (sessionStore.role) return true;
+//   return false;
+// });
+// export const isSpecial1 = createMemo(() => {
+//   if (sessionStore.isDev || sessionStore.isAdmin) return true;
+//   return false;
+// });
 
 export const appService = {
   updateMonster: async (id: number, newCat: number) => {

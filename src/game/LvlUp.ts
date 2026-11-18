@@ -1,6 +1,6 @@
 import { findAttack } from "../utils/findAttack";
 import { handleActiveBattle } from "../utils/handleActiveBattle";
-import { informer } from "../utils/Notification";
+import { log } from "../utils/logger";
 import { shouldHeal } from "../utils/shouldHeal";
 import { delayAttack } from "../utils/sleep";
 import { optionsRadioGroup, settingsStore, sessionStore } from "../utils/store";
@@ -24,7 +24,7 @@ export const LvlUp = async () => {
 
     attack = findAttack(foundSkill);
     if (!attack) break;
-    if (attack.notFound) return informer.error("Прокачка", "Атака отсутствует");
+    if (attack.notFound) return log("Атака отсутствует.");
     if (attack.back) return Attack({ targetAttack: attack.num, isHeal: true });
 
     waiter = waitForResponse("/do/pokes/load/list");
@@ -33,11 +33,11 @@ export const LvlUp = async () => {
 
     const result = await waiter;
     const monster = result.object.find((m: any) => m.id === Number(settingsStore.lvlUpMonster));
-    if (!monster) return informer.warning("Прокачка", "С собой нету монстра или он умер"); //// монстра c собой нет
+    if (!monster) return log("С собой нету монстра или он умер."); //// монстра c собой нет
 
     await delayAttack();
 
-    if (monster.lvl >= settingsStore.maxLvl) return informer.info("Прокачка", "Достигнут необходимый уровень");
+    if (monster.lvl >= settingsStore.maxLvl) return log("Достигнут необходимый уровень.");
     if ((monster.hp / monster.hp_max) * 100 <= 50) return Attack({ targetAttack: 100, isHeal: true });
 
     const monsterIndex = Array.from(document.querySelectorAll(".divContext .divElements .divElement.clickable")).findIndex((m) => Number(m.querySelector(".poke")?.getAttribute("data-p-id")) === Number(settingsStore.lvlUpMonster));

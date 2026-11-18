@@ -4,11 +4,12 @@
 //15сон - колыбель, споры гипноз, сонная пыльца,свирель
 //9 спутан - путы
 //56 насмешка
+// 13 - отравлен
 
 import { runHeal } from "../game/Heal";
 import { Swap } from "../game/Swap";
 import { findAttack } from "../utils/findAttack";
-import { informer } from "../utils/Notification";
+import { log } from "../utils/logger";
 import { toggleTeam } from "../utils/openTeam";
 import { delay, delayAttack, delayInterface } from "../utils/sleep";
 import { optionsRadioGroup, sessionStore, setSessionStore, settingsStore } from "../utils/store";
@@ -16,7 +17,7 @@ import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
 import { Attack } from "./Attack";
 
-const STATUS_MAP: Record<number, number> = { 1: 15, 2: 15, 3: 15, 4: 15, 5: 15, 6: 12, 7: 12, 8: 12, 9: 9, 10: 56 };
+const STATUS_MAP: Record<number, number> = { 1: 15, 2: 15, 3: 15, 4: 15, 5: 15, 6: 12, 7: 12, 8: 12, 9: 9, 10: 56 }; // ключ, значение
 
 interface catchOption {
   ball: number;
@@ -60,7 +61,7 @@ export const Catch = async ({ ball, useTaunt }: catchOption) => {
   }
 
   for (const result of Object.values(results)) {
-    if (result?.notFound) return informer.warning("Поимка", "Нет нужной атаки");
+    if (result?.notFound) return log("Нет нужной атаки.");
     if (result?.attack?.back) return Attack({ targetAttack: result.attack.num, isHeal: true });
     if (result?.attack?.pp - 1 <= settingsStore.limitPp) return runHeal();
     // if (!result.attack) return console.log("хз как тут не оказалось вообще атаки");

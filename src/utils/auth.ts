@@ -25,7 +25,11 @@ export async function validateSession() {
 
   try {
     const userRecord = await pb.collection("users").getOne(pb.authStore.record.id);
-    setSessionStore("userIdPocket", userRecord.id);
+    setSessionStore("role", {
+      isAdmin: userRecord.isAdmin,
+      isDev: userRecord.isDev,
+    });
+
     syncData(userRecord);
   } catch (err) {
     pb.authStore.clear();

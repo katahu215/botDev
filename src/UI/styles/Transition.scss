@@ -10,17 +10,6 @@
     opacity: 0;
   }
 
-  // &.update {
-  //   max-width: 1505px;
-  //   transition:
-  //     opacity 0.25s ease,
-  //     max-width 0.25s ease;
-
-  //   &:not(.open) {
-  //     max-width: 0;
-  //   }
-  // }
-
   &.modal {
     transform: translate3d(0, -1rem, 0);
     transition:

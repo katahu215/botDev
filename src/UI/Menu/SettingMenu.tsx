@@ -1,15 +1,14 @@
-import { createMemo, createSignal, Show, type JSX } from "solid-js";
+import { createMemo, createSignal, type JSX } from "solid-js";
 import Modal from "../Component/Modal";
 import { VirtualSlider } from "../Component/Slider";
 import Button from "../Component/Button";
 import { getFightOptions } from "./sections/fightOption";
-import { getLvlUpOptions } from "./sections/lvlUpOption";
+import { getLvlUpOptions } from "./sections/lvlUpOptions";
 import { getCatchOptions } from "./sections/catchOptions";
-import { getNotificationOptions } from "./sections/notificationOption";
+import { getNotificationOptions } from "./sections/notificationOptions";
 import { getHealOptions } from "./sections/healOptions";
-import { getAutoItemOptions } from "./sections/autoItemOption";
-import { getHalloweenOptions } from "./sections/halloweenOption";
-import { isAdmin } from "../../utils/store";
+import { getAutoItemOptions } from "./sections/autoItemOptions";
+import { getHalloweenOptions } from "./sections/halloweenOptions";
 
 export type TestModalProps = {
   id: string;
@@ -43,12 +42,9 @@ const TestModal = (props: TestModalProps): JSX.Element => {
           <Button class="Item" onClick={() => pushScreen(100)} iconName="heal">
             Лечение
           </Button>
-
-          <Show when={isAdmin()}>
-            <Button class="Item" onClick={() => pushScreen(99)} iconName="bug">
-              Автоинвентарь
-            </Button>
-          </Show>
+          <Button class="Item" onClick={() => pushScreen(99)} iconName="auto-item">
+            Автоинвентарь
+          </Button>
           <Button class="Item" onClick={() => pushScreen(40)} iconName="bell">
             Уведомления
           </Button>

@@ -1,16 +1,15 @@
 import { monstersStore, sessionStore, settingsStore } from "../utils/store";
-// import { Attack } from "./Attack";
 import { Surrender } from "./Surrender";
-// import { Catch } from "./Catch";
-import { informer } from "../utils/Notification";
+import { log } from "../utils/logger";
 
 import { toggleSwitch } from "../utils/toggleSwitch";
 import { Attack } from "./Attack";
 import { Catch } from "./Catch";
 import { LvlUp } from "./LvlUp";
+import { comboAttack } from "../testFunction/testUtils";
 
 const reaction: Record<number, () => void> = {
-  1: () => informer.info("Монстр", "Напал редкий монстр."),
+  1: () => () => log("Напал редкий монстр."),
   2: () => (settingsStore.lvlUpMonster ? LvlUp() : Attack({ targetAttack: settingsStore.attackSkill })),
   3: () => () => {},
   4: () => Surrender(),
@@ -25,7 +24,7 @@ export const mainController = async () => {
 
   if (sessionStore.isRunning && !sessionStore.isEnded) {
     const monster = monstersStore[sessionStore.hPoke.sp_id];
-    if (!monster) return informer.error("Монстр", "Сообщите об отсутствии монстра в базе!");
+    if (!monster) return log("Сообщите об отсутствии монстра в базе!");
 
     if (sessionStore.hPoke.shine) {
       const shine = sessionStore.hPoke.shine;
@@ -35,9 +34,14 @@ export const mainController = async () => {
         return Catch({ ball: 13 });
       }
 
-      return informer.warning("Шайни", "Напал шайни.");
+      return log("Напал шайни.");
     }
     if (monster.cat === 3) return handleCat3(monster);
+
+    // колючки пикана
+    if (sessionStore.role.isAdmin) {
+      if (monster.cat === 2 && monster.id === 331 && sessionStore.hPoke.lvl > 90) return comboAttack();
+    }
 
     reaction[monster.cat]();
   }

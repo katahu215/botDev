@@ -3,21 +3,20 @@ export const makeDraggable = (el: HTMLElement, handle: HTMLElement) => {
   let startX = 0;
   let startY = 0;
 
-  // Текущее накопленное смещение
   let currentX = 0;
   let currentY = 0;
 
-  // Кэш допустимых смещений (чтобы не читать DOM в pointermove)
   let minDx = 0;
   let maxDx = 0;
   let minDy = 0;
   let maxDy = 0;
 
-  // Фактическое смещение в текущем кадре
   let activeDx = 0;
   let activeDy = 0;
 
   handle.style.cursor = "grab";
+  // Важно для мобильных устройств, чтобы браузер не скроллил страницу при драге
+  handle.style.touchAction = "none";
 
   const onPointerDown = (e: PointerEvent) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
@@ -30,36 +29,34 @@ export const makeDraggable = (el: HTMLElement, handle: HTMLElement) => {
     activeDx = 0;
     activeDy = 0;
 
-    // ОПТИМИЗАЦИЯ: Считаем границы окна только один раз при старте драга.
-    // getBoundingClientRect() дорогая операция, ей не место в pointermove.
     const rect = el.getBoundingClientRect();
 
-    // Вычисляем, на сколько пикселей можно сдвинуть элемент до краев экрана
-    minDx = -rect.left; // сколько пикселей до левого края
-    maxDx = window.innerWidth - rect.right; // сколько до правого
-    minDy = -rect.top; // сколько до верхнего
-    maxDy = window.innerHeight - rect.bottom; // сколько до нижнего
+    // Исправлены знаки минус для границ экрана
+    minDx = -rect.left + currentX;
+    maxDx = window.innerWidth - rect.right + currentX;
+    minDy = -rect.top + currentY;
+    maxDy = window.innerHeight - rect.bottom + currentY;
 
     el.style.transition = "none";
   };
 
   const onPointerMove = (e: PointerEvent) => {
     if (!isDragging) return;
+
+    // Предотвращаем дефолтный скролл страницы на мобилках
+    e.preventDefault();
+
     handle.style.cursor = "grabbing";
 
-    // Сырая дельта от курсора
     const rawDx = e.clientX - startX;
     const rawDy = e.clientY - startY;
 
-    // Ограничиваем дельту вычисленными границами с помощью Math.min/max
-    activeDx = Math.min(Math.max(rawDx, minDx), maxDx);
-    activeDy = Math.min(Math.max(rawDy, minDy), maxDy);
+    activeDx = Math.min(Math.max(rawDx, minDx - currentX), maxDx - currentX);
+    activeDy = Math.min(Math.max(rawDy, minDy - currentY), maxDy - currentY);
 
-    // Итоговые координаты
     const x = currentX + activeDx;
     const y = currentY + activeDy;
 
-    // Используем translate3d для аппаратного ускорения
     el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
   };
 
@@ -69,8 +66,6 @@ export const makeDraggable = (el: HTMLElement, handle: HTMLElement) => {
     handle.style.cursor = "grab";
     isDragging = false;
 
-    // Фиксируем именно ограниченную дельту, а не позицию мыши,
-    // чтобы не было скачка, если мышь ушла за пределы окна
     currentX += activeDx;
     currentY += activeDy;
 
@@ -80,7 +75,7 @@ export const makeDraggable = (el: HTMLElement, handle: HTMLElement) => {
   };
 
   handle.addEventListener("pointerdown", onPointerDown);
-  handle.addEventListener("pointermove", onPointerMove);
+  handle.addEventListener("pointermove", onPointerMove, { passive: false });
   handle.addEventListener("pointerup", onPointerUp);
   handle.addEventListener("pointercancel", onPointerUp);
 };

@@ -1,8 +1,8 @@
-import { informer } from "../utils/Notification";
-import { delay, delayGo, delayInterface } from "../utils/sleep";
-import { sessionStore, settingsStore } from "../utils/store";
-import { toggleSwitch } from "../utils/toggleSwitch";
-import { ActionClick } from "../utils/useClick";
+import { Attack } from "../game/Attack";
+import { Swap } from "../game/Swap";
+import { delayGo, delayInterface } from "../utils/sleep";
+import { sessionStore } from "../utils/store";
+
 import { waitForResponse } from "../utils/websocket";
 
 export const trade = async () => {
@@ -65,79 +65,13 @@ const toggleTeam = async (close?: boolean) => {
   return result?.object;
 };
 
-let timeoutId: number | null = null;
+export const comboAttack = async () => {
+  if (!(await Swap("13831569"))) return false;
 
-// Переделать полностью тут жесткий1 баг с кликами
-export const autoItem = async () => {
-  if (timeoutId !== null) {
-    clearTimeout(timeoutId);
-    timeoutId = null;
+  for (let i = 0; i < 5; i++) {
+    if (!(await Attack({ targetAttack: "Отравление", attempts: 1, ignoreFight: true }))) return false;
+    if (sessionStore.hPoke.status[13]) break; // 13 отравлен
+    if (i === 4) return false;
   }
-
-  let success = false;
-  try {
-    await toggleSwitch(false);
-
-    // Если бой активен ждем окончания
-    let attempts = 3;
-    while (!sessionStore.isEnded) {
-      attempts--;
-      if (attempts < 0) throw new Error("Превышено время ожидания авто-предмета");
-      await delay(2000, 2000);
-    }
-
-    for (let i = 0; i < 5; i++) {
-      let waiter = waitForResponse("/do/items/load");
-
-      if (document.querySelectorAll(".divDockIn img")[2].classList.contains("active")) {
-        await ActionClick.handleClick({ selector: ".divDockIn img", index: 2 });
-      }
-
-      await ActionClick.handleClick({ selector: ".divDockIn img", index: 2 });
-
-      let response = await waiter;
-
-      const itemIndex = response.object.items.findIndex((el: any) => el[1] === settingsStore.autoItem);
-
-      if (itemIndex === -1) {
-        informer.error("Ошибка", "Предмет для использования не найден");
-        return;
-      }
-
-      await ActionClick.handleClick({ selector: ".divItemList .item.clickable", index: itemIndex });
-
-      await delayInterface();
-
-      waiter = waitForResponse("/do/items/use");
-
-      if (!(await ActionClick.handleContextClick({ searchText: "Использовать", selector: ".hint .hintmenu .button" }))) {
-        await delay(1000, 1000);
-        continue;
-      }
-
-      response = await waiter;
-      if (response.code === 500) {
-        success = true;
-        break;
-      }
-    }
-
-    if (!success) throw new Error("Превышено количесво попыток использовать предмет");
-
-    if (sessionStore.timerItem && sessionStore.timerItem.from && sessionStore.timerItem.to) {
-      const startTime = new Date(sessionStore.timerItem.from.replace(" ", "T")).getTime();
-      const endTime = new Date(sessionStore.timerItem.to.replace(" ", "T")).getTime();
-      const delay = Math.max(0, endTime - startTime);
-
-      timeoutId = setTimeout(() => {
-        autoItem();
-      }, delay + 2000);
-    }
-
-    await toggleSwitch(true);
-  } catch (error) {
-    informer.error("Ошибка", `Ошибка при использовании авто-предмета: ${error}`);
-  } finally {
-    await toggleSwitch(true);
-  }
+  if (!(await Attack({ targetAttack: "Отдых", isHeal: true }))) return false;
 };

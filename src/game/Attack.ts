@@ -8,14 +8,15 @@ import { waitForResponse } from "../utils/websocket";
 import { runHeal } from "./Heal";
 
 interface AttackParams {
-  targetAttack: number;
+  targetAttack: number | string;
   attempts?: number;
   isHeal?: boolean;
+  ignoreFight?: boolean;
 }
 
 // isHeal = на каче и добивателе
 // внимание сюда если буду делать хил, то ппошёл по маршруту и напал монстр
-export const Attack = async ({ targetAttack, attempts = Infinity, isHeal }: AttackParams): Promise<any> => {
+export const Attack = async ({ targetAttack, attempts = Infinity, isHeal, ignoreFight }: AttackParams): Promise<any> => {
   let waiter = null;
   let attack = null;
 
@@ -32,8 +33,18 @@ export const Attack = async ({ targetAttack, attempts = Infinity, isHeal }: Atta
 
     if (sessionStore.isEnded || shouldHeal()) break;
   }
-  if (!sessionStore.isEnded) return handleActiveBattle();
+
+  // Тут ломается место на автокомбате
+  if (!ignoreFight && !sessionStore.isEnded) {
+    handleActiveBattle();
+    return false;
+  }
 
   /// Бой окончен успешно, но нужен хил
-  if (shouldHeal({ attack }) || isHeal) return runHeal();
+  if (shouldHeal({ attack }) || isHeal) {
+    runHeal();
+    return false;
+  }
+
+  return true;
 };

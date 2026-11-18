@@ -33,11 +33,14 @@
   &.startBtn {
     position: fixed;
     width: auto;
-    color: transparent;
     font-size: 1.25rem;
-    top: 9px;
-    right: 80px;
-    z-index: 220;
+    color: white;
+    pointer-events: auto;
+
+    &.none {
+      display: none;
+    }
+
     &:hover {
       background-color: transparent !important;
     }
@@ -52,14 +55,14 @@
   }
 }
 
-@media (max-width: 768px) {
-  .Button.startBtn {
-    top: 10px;
-    right: 120px;
-    font-size: 1.5rem;
+// @media (max-width: 768px) {
+//   .Button.startBtn {
+//     top: 10px;
+//     right: 120px;
+//     font-size: 1.5rem;
 
-    &:hover {
-      background-color: transparent !important;
-    }
-  }
-}
+//     &:hover {
+//       background-color: transparent !important;
+//     }
+//   }
+// }

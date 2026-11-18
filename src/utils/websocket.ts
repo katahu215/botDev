@@ -1,11 +1,12 @@
 import { mainController } from "../game/mainContoller";
-import { catchCandy, payHalloween } from "../game/halloween";
-import { informer } from "./Notification";
+import { catchCandy, payHalloween } from "../game/Halloween";
+import { log } from "./logger";
 import { setSessionStore, sessionStore, settingsStore } from "./store";
+import { calculateType } from "./calculateType";
 
 const posting = (txt: string) => {
   if (settingsStore.alertStopBot) setSessionStore("isRunning", false);
-  informer.warning("Сообщение", txt);
+  log(txt);
 };
 const parseDropText = (text: string) => {
   const dictionary: Record<string, string> = {
@@ -148,8 +149,10 @@ const reaction: Record<string, (data: any) => void> = {
   "/do/fight/surrend": (data: any) => updateDataFight(data),
   "/do/fight/useitem": (data: any) => updateDataFight(data),
   ///
+  "/do/pc/farm/load": (data: any) => {
+    if (sessionStore.role.isDev) calculateType(data);
+  },
   "/do/loc/go": (data: any) => {
-    // console.log(data.object?.loc.id);
     setSessionStore("location", data.object?.loc.id);
   },
   ///
