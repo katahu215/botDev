@@ -6,8 +6,8 @@
 //56 насмешка
 // 13 - отравлен
 
-import { runHeal } from "../game/Heal";
-import { Swap } from "../game/Swap";
+import { heal } from "./heal";
+import { swap } from "./swap";
 import { findAttack } from "../utils/findAttack";
 import { log } from "../utils/logger";
 import { toggleTeam } from "../utils/openTeam";
@@ -26,19 +26,19 @@ interface catchOption {
 
 let countTaunt = 0;
 
-export const Catch = async ({ ball, useTaunt }: catchOption) => {
-  if (settingsStore.catchMonster && sessionStore.iPoke.id !== Number(settingsStore.catchMonster)) {
-    const swap = await Swap(settingsStore.catchMonster);
-    if (!swap) return;
+export const catchAttack = async ({ ball, useTaunt }: catchOption) => {
+  if (settingsStore.catch.targetMonsterId && sessionStore.activeMonster.id !== settingsStore.catch.targetMonsterId) {
+    const swapMonster = await swap(settingsStore.catch.targetMonsterId);
+    if (!swapMonster) return;
   }
 
   if (useTaunt) countTaunt = 0;
 
   await toggleMonsterTeam();
 
-  const wSkill = optionsRadioGroup.skillWeather.find((i) => i.value === settingsStore.skillWeather)?.label || "";
-  const cSkill = optionsRadioGroup.skillCatch.find((i) => i.value === settingsStore.skillCatch)?.label || "";
-  const sSkill = optionsRadioGroup.skillStatus.find((i) => i.value === settingsStore.skillStatus)?.label || "";
+  const wSkill = optionsRadioGroup.skillWeather.find((i) => i.value === settingsStore.catch.weatherSkillId)?.label || "";
+  const cSkill = optionsRadioGroup.skillCatch.find((i) => i.value === settingsStore.catch.skillId)?.label || "";
+  const sSkill = optionsRadioGroup.skillStatus.find((i) => i.value === settingsStore.catch.statusSkillId)?.label || "";
 
   const results: Record<string, any> = {};
 
@@ -47,31 +47,31 @@ export const Catch = async ({ ball, useTaunt }: catchOption) => {
       results.taunt = await runStep({ skill: "Насмешка", isStatus: true, useTaunt });
       if (!results.taunt.reaction) break;
     }
-    if (settingsStore.skillWeather) {
+    if (settingsStore.catch.weatherSkillId) {
       results.weather = await runStep({ skill: wSkill, isWeather: true, useTaunt });
       if (!results.weather.reaction) break;
     }
     results.catch = await runStep({ skill: cSkill, useTaunt });
     if (!results.catch.reaction) break;
-    if (settingsStore.skillStatus) {
+    if (settingsStore.catch.statusSkillId) {
       results.status = await runStep({ skill: sSkill, isStatus: true, useTaunt });
       if (!results.status.reaction) break;
     }
-    if (!(await useBall(ball)) || sessionStore.isEnded) break;
+    if (!(await useBall(ball)) || sessionStore.isBattleFinished) break;
   }
 
   for (const result of Object.values(results)) {
     if (result?.notFound) return log("Нет нужной атаки.");
     if (result?.attack?.back) return Attack({ targetAttack: result.attack.num, isHeal: true });
-    if (result?.attack?.pp - 1 <= settingsStore.limitPp) return runHeal();
+    if (result?.attack?.pp - 1 <= settingsStore.survival.minPpPercent) return heal();
     // if (!result.attack) return console.log("хз как тут не оказалось вообще атаки");
   }
 
   //  если  бой окончен и проверки выполнены
-  setSessionStore("monstersTeam", "count", (prevCount) => prevCount + 1);
+  setSessionStore("monstersTeam", "totalCount", (prevCount) => prevCount + 1);
   await toggleMonsterTeam();
 
-  if (cSkill === "Блуждающие огни" || cSkill === "Семена-пиявки") return runHeal();
+  if (cSkill === "Блуждающие огни" || cSkill === "Семена-пиявки") return heal();
 };
 
 interface StepOptions {
@@ -83,11 +83,11 @@ interface StepOptions {
 const runStep = async ({ skill, isWeather, isStatus, useTaunt }: StepOptions) => {
   let attack = null;
   for (let i = 0; i < 15; i++) {
-    if (!isStatus && (sessionStore.hPoke.hp / sessionStore.hPoke.hp_max) * 100 <= settingsStore.limitHp) break;
-    if (isWeather && sessionStore.fightData.weather?.[0] === settingsStore.skillWeather) break;
+    if (!isStatus && (sessionStore.opponentMonster.hp / sessionStore.opponentMonster.hp_max) * 100 <= settingsStore.survival.minHpPercent) break;
+    if (isWeather && sessionStore.battleState.weather?.[0] === settingsStore.catch.weatherSkillId) break;
     if (isStatus) {
-      const status = useTaunt ? 10 : settingsStore.skillStatus;
-      if (sessionStore.hPoke.status[STATUS_MAP[status]]) break;
+      const status = useTaunt ? 10 : settingsStore.catch.statusSkillId;
+      if (sessionStore.opponentMonster.status[STATUS_MAP[status]]) break;
     }
 
     await delayAttack();
@@ -111,10 +111,10 @@ const runStep = async ({ skill, isWeather, isStatus, useTaunt }: StepOptions) =>
       }
     }
 
-    if (sessionStore.isEnded) break;
+    if (sessionStore.isBattleFinished) break;
   }
 
-  if (sessionStore.isEnded) return { attack, notFound: false, reaction: false };
+  if (sessionStore.isBattleFinished) return { attack, notFound: false, reaction: false };
 
   return { attack, notFound: false, reaction: true };
 };
@@ -144,20 +144,20 @@ export const useBall = async (ball: number): Promise<boolean> => {
   return true;
 };
 const toggleMonsterTeam = async () => {
-  if (!sessionStore.monstersTeam.count) {
+  if (!sessionStore.monstersTeam.totalCount) {
     const response = await toggleTeam(true);
 
     const arrayTemp = response.map((item: any) => item.id);
 
     setSessionStore("monstersTeam", {
-      block: arrayTemp,
-      count: response.length,
+      blockedMonsterIds: arrayTemp,
+      totalCount: response.length,
     });
   }
 
-  if (sessionStore.monstersTeam.count === 6) {
-    setSessionStore("isBackMonster", true);
-    setSessionStore("monstersTeam", "count", 0);
-    return runHeal();
+  if (sessionStore.monstersTeam.totalCount === 6) {
+    setSessionStore("isGiveMonsters", true);
+    setSessionStore("monstersTeam", "totalCount", 0);
+    return heal();
   }
 };

@@ -5,7 +5,7 @@ import { setSessionStore, sessionStore, settingsStore } from "./store";
 import { calculateType } from "./calculateType";
 
 const posting = (txt: string) => {
-  if (settingsStore.alertStopBot) setSessionStore("isRunning", false);
+  if (settingsStore.alerts.isEnabled) setSessionStore("isEnabled", false);
   log(txt);
 };
 const parseDropText = (text: string) => {
@@ -87,7 +87,9 @@ const parseDropText = (text: string) => {
       }
 
       if (cmd === "Exp.TConds_upd") {
-        setSessionStore("timerItem", args?.[1]?.[0]);
+        const cond = args?.[1]?.[0];
+        const cooldownSec = cond ? Math.max(0, cond.to - cond.from) : 3600;
+        setSessionStore("itemCooldown", cooldownSec);
         return fn.apply(this, args);
       }
 
@@ -111,18 +113,18 @@ const updateDataFight = (data: any) => {
 
   if (data?.object?.fight) {
     const fight = data.object.fight;
-    setSessionStore("fightData", fight);
-    setSessionStore("iPoke", fight.side?.I?.poke);
-    setSessionStore("hPoke", fight.side?.H?.poke);
-    setSessionStore("isEnded", fight.is_ended);
-    setSessionStore("isAgro", Boolean(fight.options?.agro));
+    setSessionStore("battleState", fight);
+    setSessionStore("activeMonster", fight.side?.I?.poke);
+    setSessionStore("opponentMonster", fight.side?.H?.poke); /// не юзаеться?
+    setSessionStore("isBattleFinished", fight.is_ended);
+    setSessionStore("isAgroLocation", Boolean(fight.options?.agro));
   } else {
     const obj = data?.object;
-    setSessionStore("fightData", obj);
-    setSessionStore("iPoke", obj?.side?.I?.poke);
-    setSessionStore("hPoke", obj?.side?.H?.poke);
-    setSessionStore("isEnded", obj?.is_ended);
-    setSessionStore("isAgro", Boolean(obj?.options?.agro));
+    setSessionStore("battleState", obj);
+    setSessionStore("activeMonster", obj?.side?.I?.poke);
+    setSessionStore("opponentMonster", obj?.side?.H?.poke);
+    setSessionStore("isBattleFinished", obj?.is_ended);
+    setSessionStore("isAgroLocation", Boolean(obj?.options?.agro));
   }
 };
 
@@ -132,7 +134,7 @@ const reaction: Record<string, (data: any) => void> = {
     const userName = document.querySelector(".trainer.me .label")?.textContent.trim() as string;
     setSessionStore("userId", userId);
     setSessionStore("userName", userName);
-    setSessionStore("location", data.object.loc.id);
+    setSessionStore("locationId", data.object.loc.id);
   },
 
   "/do/refresher": (data: any) => {
@@ -150,10 +152,10 @@ const reaction: Record<string, (data: any) => void> = {
   "/do/fight/useitem": (data: any) => updateDataFight(data),
   ///
   "/do/pc/farm/load": (data: any) => {
-    if (sessionStore.role.isDev) calculateType(data);
+    if (sessionStore.permissions.isAdmin || sessionStore.permissions.isVip) calculateType(data);
   },
   "/do/loc/go": (data: any) => {
-    setSessionStore("location", data.object?.loc.id);
+    setSessionStore("locationId", data.object?.loc.id);
   },
   ///
   // "/do/pc/heal/poke": (data: any) => console.log("heal", data),

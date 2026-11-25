@@ -8,8 +8,7 @@ import { mainController } from "../../game/mainContoller";
 import { toggleDropMenu } from "./DropMenu";
 import { toggleSwitch } from "../../utils/toggleSwitch";
 import { createSignal, Show } from "solid-js";
-import { runHeal } from "../../game/Heal";
-import { log } from "../../utils/logger";
+import { shutdownGame } from "../../game/utils/shutdownGame";
 
 const [navigationOpen, setNavigationMenuOpen] = createSignal(false);
 export const toggleNavigationMenu = () => setNavigationMenuOpen((v) => !v);
@@ -22,12 +21,12 @@ const NavigationMenu = () => {
           class="Item"
           iconName="sword"
           onClick={() => {
-            if (sessionStore.isRunning) return;
+            if (sessionStore.isEnabled) return;
 
-            setSessionStore("isRunning", true);
+            setSessionStore("isEnabled", true);
             mainController();
           }}
-          disable={sessionStore.isRunning}
+          disable={sessionStore.isEnabled}
         >
           Старт
         </Button>
@@ -35,7 +34,7 @@ const NavigationMenu = () => {
           class="Item"
           iconName="stop"
           onClick={() => {
-            setSessionStore("isRunning", false);
+            setSessionStore("isEnabled", false);
             toggleSwitch(false);
           }}
         >
@@ -62,11 +61,8 @@ const NavigationMenu = () => {
         <Button class="Item" iconName="book" onClick={() => toggleDropMenu()}>
           Дроп
         </Button>
-        <Show when={sessionStore.role.isAdmin}>
-          <Button class="Item" iconName="bug" onClick={() => log("привет electron")}></Button>
-          <Button class="Item" iconName="bug" onClick={() => runHeal()}>
-            heal
-          </Button>
+        <Show when={sessionStore.permissions.isAdmin}>
+          <Button class="Item" iconName="bug" onClick={() => shutdownGame()}></Button>
         </Show>
       </div>
     </div>

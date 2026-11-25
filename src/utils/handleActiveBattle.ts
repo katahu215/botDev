@@ -1,15 +1,15 @@
 import { Attack } from "../game/Attack";
-import { runHeal } from "../game/Heal";
-import { Surrender } from "../game/Surrender";
-import { Swap } from "../game/Swap";
+import { heal } from "../game/heal";
+import { surrender } from "../game/surrender";
+import { swap } from "../game/swap";
 import { settingsStore } from "./store";
 
 export const handleActiveBattle = async (): Promise<any> => {
   //  Если есть добиватель
-  if (settingsStore.finishMonster) {
-    if (await Swap(settingsStore.finishMonster)) {
+  if (settingsStore.battle.finishTargetMonsterId) {
+    if (await swap(settingsStore.battle.finishTargetMonsterId)) {
       return Attack({
-        targetAttack: settingsStore.finishSkill,
+        targetAttack: settingsStore.battle.finishSkillId,
         isHeal: true,
       });
     }
@@ -17,5 +17,5 @@ export const handleActiveBattle = async (): Promise<any> => {
   }
 
   //  Если финишера нет
-  if (await Surrender()) return runHeal();
+  if (await surrender()) return heal();
 };

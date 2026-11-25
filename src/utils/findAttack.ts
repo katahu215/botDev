@@ -13,10 +13,10 @@ export type PokemonMove = {
 };
 
 const ignoreAttack = ["Подставной ход", "Крик банши", "Замедленная бомба"];
-const isAttackUsable = (attack: PokemonMove, element?: Element) => attack.pp > settingsStore.limitPp && !element?.classList.contains("disabled");
+const isAttackUsable = (attack: PokemonMove, element?: Element) => attack.pp > settingsStore.survival.minPpPercent && !element?.classList.contains("disabled");
 
 export const findAttack = (target: string | number) => {
-  const movesObj = sessionStore.iPoke?.moves ?? {};
+  const movesObj = sessionStore.activeMonster?.moves ?? {};
   const monsterArray = Object.values(movesObj).filter((m): m is PokemonMove => m !== null);
 
   const moveElements = document.querySelectorAll("#divFightI .moves .divMove");
@@ -38,7 +38,7 @@ export const findAttack = (target: string | number) => {
 
   //// 13 призрак 12 обычка
 
-  const isGhost = sessionStore.hPoke.typ.includes(13);
+  const isGhost = sessionStore.opponentMonster.typ.includes(13);
 
   const usableAttacks = monsterArray.filter((m) => {
     if (ignoreAttack.includes(m.title)) return false;

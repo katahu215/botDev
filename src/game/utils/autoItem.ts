@@ -1,28 +1,22 @@
-import { log } from "./logger";
-import { delay, delayInterface } from "./sleep";
-import { sessionStore, settingsStore } from "./store";
-import { toggleSwitch } from "./toggleSwitch";
-import { ActionClick } from "./useClick";
-import { waitForResponse } from "./websocket";
+import { log } from "../../utils/logger";
+import { delay, delayInterface } from "../../utils/sleep";
+import { sessionStore, settingsStore } from "../../utils/store";
+import { toggleSwitch } from "../../utils/toggleSwitch";
+import { ActionClick } from "../../utils/useClick";
+import { waitForResponse } from "../../utils/websocket";
 
-interface Timer {
-  isRunning: boolean;
-  timeoutId: number | null;
-}
-let timer: Timer = {
-  isRunning: false,
-  timeoutId: null,
-};
+let isRunning = false;
+let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
 export const autoItem = async () => {
-  if (timer.isRunning) return;
-  timer.isRunning = true;
+  if (isRunning) return;
+  isRunning = true;
   await toggleSwitch(false);
 
   try {
-    if (timer.timeoutId !== null) {
-      clearTimeout(timer.timeoutId);
-      timer.timeoutId = null;
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
     }
 
     for (let i = 0; i <= 5; i++) {
@@ -44,7 +38,7 @@ export const autoItem = async () => {
 
       let response = await waiter;
 
-      const itemIndex = response.object.items.findIndex((el: any) => el[1] === settingsStore.autoItem);
+      const itemIndex = response.object.items.findIndex((el: any) => el[1] === settingsStore.automation.autoItemId);
       if (itemIndex === -1) return log("Предмет для использования не найден.");
 
       // если не все, то открыть все
@@ -65,13 +59,11 @@ export const autoItem = async () => {
 
       if (response.code === 500) {
         await delay(1000, 1200); // удерживать для вебсокета
-        const from = new Date(sessionStore.timerItem.from.replace(" ", "T") + "Z");
-        const to = new Date(sessionStore.timerItem.to.replace(" ", "T") + "Z");
 
-        timer.timeoutId = setTimeout(() => {
-          timer.timeoutId = null;
+        timeoutId = setTimeout(() => {
+          timeoutId = null;
           autoItem();
-        }, to.getTime() - from.getTime());
+        }, sessionStore.itemCooldown * 1000);
         break;
       }
     }
@@ -80,6 +72,12 @@ export const autoItem = async () => {
       document.querySelectorAll<HTMLElement>(".divDockIn .icon")[2]?.click();
     }
     await toggleSwitch(true);
-    timer.isRunning = false;
+    isRunning = false;
+  }
+};
+export const clearAutoItemTimer = () => {
+  if (timeoutId !== null) {
+    clearTimeout(timeoutId);
+    timeoutId = null;
   }
 };

@@ -13,7 +13,7 @@ export const getHealOptions = () => [
         <Button
           class="Item values"
           iconName="pen"
-          value={settingsStore.limitHp}
+          value={settingsStore.survival.minHpPercent}
           onClick={() =>
             modalService.open(Confirm, {
               title: "Процент",
@@ -21,14 +21,14 @@ export const getHealOptions = () => [
               showInput: true,
               isNumber: true,
               inputPlaceholder: "число",
-              initialValue: settingsStore.limitHp,
-              onConfirm: (value: any) => appService.updateSettings("limitHp", value),
+              initialValue: settingsStore.survival.minHpPercent,
+              onConfirm: (value: any) => appService.updateSettings("survival", { minHpPercent: value }),
             })
           }
         >
           Процент для лечения:
         </Button>
-        <Switcher title="Через арену ЛЧ" checked={settingsStore.useArenaHeal} onChange={(val) => appService.updateSettings("useArenaHeal", val)} class="Item" />
+        <Switcher title="Через арену ЛЧ" checked={settingsStore.survival.useArenaHeal} onChange={(val) => appService.updateSettings("survival", { useArenaHeal: val })} class="Item" />
       </div>
     ),
   },

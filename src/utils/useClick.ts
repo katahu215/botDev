@@ -32,7 +32,7 @@ export const ActionClick = {
     if (!(await guard(force))) return false;
 
     try {
-      if (sessionStore.isMobile) return await ActionClick.clickAndroid(selector, index, mobileDocker);
+      if (sessionStore.isMobile) return await ActionClick.clickMobile(selector, index, mobileDocker);
 
       return await win.ssevsType.triggerClick(selector, index);
     } catch (error) {
@@ -42,12 +42,11 @@ export const ActionClick = {
   },
   async handleClickAttack(key: number, priority?: boolean) {
     const index = key > 0 ? key - 1 : 0;
-
     if (sessionStore.isMobile) return await ActionClick.handleClick({ selector: fight_selector, index: key - 1 });
 
-    if (priority) return await this.handleClick({ selector: fight_selector, index }); // это что бы не багался меню атаки при каче
+    if (priority) return await ActionClick.handleClick({ selector: fight_selector, index }); // это что бы не багался меню атаки при каче
 
-    return await this.handleHotkey(index);
+    return await ActionClick.handleHotkey(index);
   },
   async handleContextClick({ searchText, selector, force, mobileDocker }: ContextOptions) {
     const selectorTarget = selector ?? ".divContext .divElements .divElement.clickable";
@@ -57,7 +56,7 @@ export const ActionClick = {
 
     if (index === -1) return false;
 
-    return await this.handleClick({ selector: selectorTarget, index, force, mobileDocker });
+    return await ActionClick.handleClick({ selector: selectorTarget, index, force, mobileDocker });
   },
   async handleHotkey(key: number) {
     if (!(await guard())) return false;
@@ -80,10 +79,165 @@ export const ActionClick = {
       win?.KotlinBridge?.triggerClick(selector, index, callbackId);
     });
   },
+  async clickMobile(selector: string, index: number, mobileDocker: boolean | undefined) {
+    if (win?.KotlinBridge) {
+      return await ActionClick.clickAndroid(selector, index, mobileDocker);
+    } else {
+      // Для iOS вызываем нашу навороченную JS-эмуляцию
+      return await ActionClick.clickIOS(selector, index, mobileDocker);
+    }
+  },
+  async clickIOS(selector: string, index: number, mobileDocker: boolean | undefined) {
+    if (!(await closeAllMenu(mobileDocker))) return false;
+    console.log(true);
+
+    const elements = document.querySelectorAll(selector);
+    if (elements.length <= index) {
+      console.warn(`Элемент не найден по селектору: ${selector}[${index}]`);
+      return false;
+    }
+
+    const el = elements[index];
+    el.scrollIntoView({ behavior: "instant", block: "center", inline: "center" });
+
+    const rect = el.getBoundingClientRect();
+
+    // Вычисляем зону с отступом 30% от краев (оставляем центральные 40% для кликов)
+    const marginX = rect.width * 0.3;
+    const marginY = rect.height * 0.3;
+
+    // Доступная ширина и высота для рандома
+    const availableWidth = rect.width - marginX * 2;
+    const availableHeight = rect.height - marginY * 2;
+
+    // Если элемент слишком маленький, падаем обратно на центр с небольшим смещением
+    const randomX = availableWidth > 0 ? marginX + Math.random() * availableWidth : rect.width / 2;
+    const randomY = availableHeight > 0 ? marginY + Math.random() * availableHeight : rect.height / 2;
+
+    const x = rect.left + randomX;
+    const y = rect.top + randomY;
+
+    // === ВИЗУАЛЬНЫЙ ОТЛАДОЧНЫЙ МАРКЕР ===
+    const marker = document.createElement("div");
+    marker.style.position = "fixed";
+    marker.style.left = `${x - 6}px`;
+    marker.style.top = `${y - 6}px`;
+    marker.style.width = "12px";
+    marker.style.height = "12px";
+    marker.style.backgroundColor = "rgba(255, 0, 0, 0.7)";
+    marker.style.border = "2px solid white";
+    marker.style.borderRadius = "50%";
+    marker.style.zIndex = "9999999";
+    marker.style.pointerEvents = "none";
+    marker.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+    marker.style.transform = "scale(1.4)";
+    document.body.appendChild(marker);
+
+    // Анимация исчезновения маркера
+    setTimeout(() => {
+      marker.style.opacity = "0";
+      marker.style.transform = "scale(0.5)";
+      setTimeout(() => marker.remove(), 600);
+    }, 400);
+    // ===================================
+
+    const target = document.elementFromPoint(x, y) || el;
+
+    target.dispatchEvent(
+      new PointerEvent("pointermove", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: x,
+        clientY: y,
+        pointerId: 1,
+        pointerType: "touch",
+        isPrimary: true,
+      }),
+    );
+
+    // Случайный размер и форма пальца (эллипс контакта)
+    const rx = 8.0 + Math.random() * 6.0;
+    const ry = 10.0 + Math.random() * 8.0;
+    const forceVal = 0.5 + Math.random() * 0.5;
+
+    // Создаем объект Touch для мобильного Safari с динамическими размерами
+    const touchObj = new Touch({
+      identifier: Date.now(),
+      target: target,
+      clientX: x,
+      clientY: y,
+      radiusX: rx,
+      radiusY: ry,
+      rotationAngle: Math.random() * Math.PI,
+      force: forceVal,
+    });
+
+    const touchInit = {
+      cancelable: true,
+      bubbles: true,
+      view: window,
+      touches: [touchObj],
+      targetTouches: [touchObj],
+      changedTouches: [touchObj],
+    };
+
+    target.dispatchEvent(new TouchEvent("touchstart", touchInit));
+    target.dispatchEvent(
+      new PointerEvent("pointerdown", {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: x,
+        clientY: y,
+        pointerId: 1,
+        pointerType: "touch",
+        isPrimary: true,
+      }),
+    );
+
+    if (typeof (target as HTMLElement).focus === "function") {
+      (target as HTMLElement).focus();
+    }
+
+    const holdTime = 60 + Math.random() * 60;
+    return new Promise((resolve) => {
+      setTimeout(async () => {
+        // Фаза отпускания (touchend + pointerup + click)
+        target.dispatchEvent(new TouchEvent("touchend", touchInit));
+        target.dispatchEvent(
+          new PointerEvent("pointerup", {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            clientX: x,
+            clientY: y,
+            pointerId: 1,
+            pointerType: "touch",
+            isPrimary: true,
+          }),
+        );
+
+        // Синтетический клик без дублирующего нативного вызова .click()
+        target.dispatchEvent(
+          new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+            clientX: x,
+            clientY: y,
+          }),
+        );
+
+        await delay(300, 500);
+        resolve(true);
+      }, holdTime);
+    });
+  },
 };
 
 const guard = async (force = false) => {
-  if (!sessionStore.isRunning && !force) return false;
+  if (!sessionStore.isEnabled && !force) return false;
   return await resolveCaptcha();
 };
 const closeAllMenu = async (mobileDocker: boolean = false) => {

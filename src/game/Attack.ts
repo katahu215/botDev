@@ -5,18 +5,17 @@ import { delayAttack } from "../utils/sleep";
 import { sessionStore } from "../utils/store";
 import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
-import { runHeal } from "./Heal";
+import { heal } from "./heal";
 
 interface AttackParams {
   targetAttack: number | string;
   attempts?: number;
   isHeal?: boolean;
-  ignoreFight?: boolean;
+  combo?: boolean;
 }
 
 // isHeal = на каче и добивателе
-// внимание сюда если буду делать хил, то ппошёл по маршруту и напал монстр
-export const Attack = async ({ targetAttack, attempts = Infinity, isHeal, ignoreFight }: AttackParams): Promise<any> => {
+export const Attack = async ({ targetAttack, attempts = Infinity, isHeal, combo }: AttackParams): Promise<any> => {
   let waiter = null;
   let attack = null;
 
@@ -31,18 +30,17 @@ export const Attack = async ({ targetAttack, attempts = Infinity, isHeal, ignore
     if (!(await ActionClick.handleClickAttack(attack?.num))) return false;
     await waiter;
 
-    if (sessionStore.isEnded || shouldHeal()) break;
+    if (sessionStore.isBattleFinished || shouldHeal()) break;
   }
 
-  // Тут ломается место на автокомбате
-  if (!ignoreFight && !sessionStore.isEnded) {
+  if (!combo && !sessionStore.isBattleFinished) {
     handleActiveBattle();
     return false;
   }
 
   /// Бой окончен успешно, но нужен хил
   if (shouldHeal({ attack }) || isHeal) {
-    runHeal();
+    heal();
     return false;
   }
 

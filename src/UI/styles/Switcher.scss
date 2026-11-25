@@ -45,7 +45,7 @@
   }
 
   .widget {
-    background-color: var(--color-hover);
+    background-color: var(--color--widget);
     border-radius: 0.5rem;
     width: 2rem;
     height: 8px;
@@ -60,7 +60,7 @@
       width: 14px;
       height: 14px;
       background-color: var(--color-bg);
-      border: 0.125rem solid var(--color-hover);
+      border: 0.125rem solid var(--color--widget);
       border-radius: 50%;
       flex-shrink: 0;
       transition:

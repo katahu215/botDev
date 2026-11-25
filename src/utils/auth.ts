@@ -25,10 +25,6 @@ export async function validateSession() {
 
   try {
     const userRecord = await pb.collection("users").getOne(pb.authStore.record.id);
-    setSessionStore("role", {
-      isAdmin: userRecord.isAdmin,
-      isDev: userRecord.isDev,
-    });
 
     syncData(userRecord);
   } catch (err) {
@@ -76,6 +72,10 @@ const syncData = (record: any) => {
 
     const mergedSettings = Object.fromEntries(defaultKeys.map((key) => [key, userSettings[key] !== undefined ? userSettings[key] : (defaultSettings as any)[key]]));
 
+    setSessionStore("permissions", {
+      isVip: record.is_vip,
+      isAdmin: record.is_admin,
+    });
     setSettingsStore(mergedSettings);
 
     const hasMissingFields = defaultKeys.some((key) => userSettings[key] === undefined);

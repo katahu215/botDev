@@ -4,6 +4,8 @@ import Confirm from "../../Component/Confirm";
 import { modalService } from "../../Component/modalService";
 import RadioGroup from "../../Component/Radio";
 
+const save = (param: string, value: any) => appService.updateSettings("battle", { [param]: value });
+
 export const getFightOptions = (pushScreen: (id: number) => void) => [
   {
     id: 1,
@@ -30,7 +32,7 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
     children: (
       <>
         <div class="List">
-          <RadioGroup options={optionsRadioGroup.attackSkill} value={settingsStore.attackSkill} name="attackSkill" onChange={(val) => appService.updateSettings("attackSkill", val)} />
+          <RadioGroup options={optionsRadioGroup.attackSkill} value={settingsStore.battle.attackSkillId} name="attackSkill" onChange={(val) => save("attackSkillId", val)} />
         </div>
         <div class="secondary-text">При выборе «Все» используются все доступные атаки для убийства.</div>
       </>
@@ -50,7 +52,7 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
           <Button
             class="Item values"
             iconName="pen"
-            value={settingsStore.finishMonster}
+            value={settingsStore.battle.finishTargetMonsterId}
             onClick={() =>
               modalService.open(Confirm, {
                 title: "Добиватель",
@@ -59,8 +61,8 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
                 showInput: true,
                 isNumber: true,
                 inputPlaceholder: "id монстра",
-                initialValue: settingsStore.finishMonster,
-                onConfirm: (value: any) => appService.updateSettings("finishMonster", value),
+                initialValue: settingsStore.battle.finishTargetMonsterId,
+                onConfirm: (value: any) => save("finishTargetMonsterId", value),
               })
             }
           >
@@ -75,7 +77,7 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
     title: "Атаки",
     children: (
       <div class="List">
-        <RadioGroup options={optionsRadioGroup.finishSkill} value={settingsStore.finishSkill} name="finishSkill" onChange={(val) => appService.updateSettings("finishSkill", val)} />
+        <RadioGroup options={optionsRadioGroup.finishSkill} value={settingsStore.battle.finishSkillId} name="finishSkill" onChange={(val) => save("finishSkillId", val)} />
       </div>
     ),
   },

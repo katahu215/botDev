@@ -4,16 +4,16 @@ import { sessionStore, setSessionStore, settingsStore } from "../utils/store.js"
 import { toggleAutoConfirm } from "../utils/toggleAutoConfirm.ts";
 import { ActionClick } from "../utils/useClick.js";
 import { waitForResponse } from "../utils/websocket.ts";
-import { Surrender } from "./Surrender.ts";
 import { toggleSwitch } from "../utils/toggleSwitch.ts";
 import { log } from "../utils/logger.ts";
+import { surrender } from "./surrender.ts";
 
-interface RoutesData {
-  [routeName: number]: {
+interface HealRoutesMap {
+  [locationId: number]: {
     [step: number]: number[];
   };
 }
-const routesHeal: RoutesData = {
+const HEAL_ROUTES: HealRoutesMap = {
   // ВД
   22: {
     1: [22, 23, 25],
@@ -77,6 +77,10 @@ const routesHeal: RoutesData = {
   },
   159: {
     1: [159, 158, 45, 41, 33, 35],
+  },
+  // Полицейский участок ВД
+  314: {
+    1: [314, 9, 1, 3],
   },
   //
   411: {
@@ -261,73 +265,35 @@ const routesHeal: RoutesData = {
   },
 };
 
-export const runHeal = async () => {
+export const heal = async () => {
   await toggleSwitch(false);
-  if (settingsStore.useArenaHeal) return teleportArea("Арена Лиги Чемпионов");
 
-  const route = routesHeal[sessionStore.location];
+  if (settingsStore.survival.useArenaHeal) return teleportArea("Арена Лиги Чемпионов");
+
+  const route = HEAL_ROUTES[sessionStore.locationId];
+
   if (!route) {
-    if (document.querySelector(".btnLocHeal")) return await ActionClick.handleHotkey(100);
-    return log("Маршрут отсутствует. Сообщите локацию.");
+    if (document.querySelector(".btnLocHeal")) return await healLocation();
+
+    return log("Маршрут отсутствует. Сообщите локацию для добавления.");
   }
-
-  const goToStep = async (index: number) => {
-    while (true) {
-      const wait = waitForResponse("/do/loc/go");
-      await ActionClick.handleClick({ selector: `#btnGo${index}` });
-      const response = await wait;
-
-      if (response?.code === 400) {
-        await Surrender();
-        continue;
-      }
-      break;
-    }
-    await delayGo();
-  };
 
   //
 
-  if (!sessionStore.isEnded && !(await Surrender())) return false;
+  if (!sessionStore.isBattleFinished && !(await surrender())) return false;
   await delayGo();
 
-  for (let i = 1; route[1].length > i; i++) await goToStep(route[1][i]);
+  for (let i = 1; route[1].length > i; i++) await clickGo(route[1][i]);
 
-  await healing();
+  await healLocation();
 
   if (route[2]) {
-    for (let i = 0; route[2].length > i; i++) await goToStep(route[2][i]);
+    for (let i = 0; route[2].length > i; i++) await clickGo(route[2][i]);
   } else {
-    for (let i = route[1].length - 2; i >= 0; i--) await goToStep(route[1][i]);
+    for (let i = route[1].length - 2; i >= 0; i--) await clickGo(route[1][i]);
   }
+
   await toggleSwitch(true);
-};
-const healing = async () => {
-  if (sessionStore.isBackMonster) {
-    await backMonster();
-    setSessionStore("isBackMonster", false);
-  }
-
-  await delayInterface();
-
-  let wait = waitForResponse("/do/pc/heal/poke");
-
-  if (!sessionStore.isMobile) {
-    await ActionClick.handleHotkey(100);
-    return await wait;
-  }
-
-  //  Мобилльная версия
-  wait = waitForResponse("/do/pc/heal/load");
-  await ActionClick.handleClick({ selector: "#divLocNpc .btnLocHeal" });
-  const result = await wait;
-  if (result.code === 400) return;
-  /// пауза перед кликом на хил
-  await delayGo();
-
-  wait = waitForResponse("/do/pc/heal/poke");
-  await ActionClick.handleContextClick({ searchText: "Лечить всех" });
-  return await wait;
 };
 
 const teleportArea = async (target: string): Promise<boolean | void> => {
@@ -367,7 +333,7 @@ const teleportArea = async (target: string): Promise<boolean | void> => {
     await ActionClick.handleContextClick({ searchText: `${target}`, mobileDocker: true });
     const result = await wait;
 
-    if (result.code === 400 && !(await Surrender())) {
+    if (result.code === 400 && !(await surrender())) {
       toggleAutoConfirm();
       return false;
     }
@@ -380,9 +346,9 @@ const teleportArea = async (target: string): Promise<boolean | void> => {
   toggleAutoConfirm();
 };
 const healingArea = async () => {
-  if (sessionStore.isBackMonster) {
+  if (sessionStore.isGiveMonsters) {
     await backMonster();
-    setSessionStore("isBackMonster", false);
+    setSessionStore("isGiveMonsters", false);
   }
 
   await delayInterface();
@@ -398,22 +364,19 @@ const healingArea = async () => {
     return teleportArea("Возврат на локацию");
   }
 
-  //  Запасной вариант если кнопки отключены
-  // wait = waitForResponse("/do/pc/heal/load");
-  await ActionClick.handleClick({ selector: ".divCompetePanel .button.justicon:has(span.icon-more)", mobileDocker: true });
-  // await wait;
+  await ActionClick.handleClick({ selector: ".divCompetePanel .button.justicon:has(span.icon-more)" });
 
   await delayGo();
 
   wait = waitForResponse("/do/pc/heal/load");
-  await ActionClick.handleContextClick({ searchText: "Лечение монстров", mobileDocker: true });
+  await ActionClick.handleContextClick({ searchText: "Лечение монстров" });
   const result = await wait;
   if (result.code === 400) return teleportArea("Возврат на локацию");
 
   await delayGo();
 
   wait = waitForResponse("/do/pc/heal/poke");
-  await ActionClick.handleContextClick({ searchText: "Лечить всех", mobileDocker: true });
+  await ActionClick.handleContextClick({ searchText: "Лечить всех" });
   await wait;
 
   teleportArea("Возврат на локацию");
@@ -425,7 +388,7 @@ const backMonster = async () => {
 
   for (let i = 0; i < result.length; i++) {
     const monster = result[i];
-    if (sessionStore.monstersTeam.block.includes(monster.id)) continue;
+    if (sessionStore.monstersTeam.blockedMonsterIds.includes(monster.id)) continue;
 
     let waiter = waitForResponse("/do/pc/farm/poke");
     await ActionClick.handleClick({ selector: `.divPokeTeam .poke[data-p-id="${monster.id}"] .maincardContainer .title .button.justicon` });
@@ -435,4 +398,50 @@ const backMonster = async () => {
 
   /// закрыть
   await ActionClick.handleClick({ selector: ".divDockIn .dockitem", index: 1 });
+};
+
+//
+const clickGo = async (index: number) => {
+  while (true) {
+    const wait = waitForResponse("/do/loc/go");
+    await ActionClick.handleClick({ selector: `#btnGo${index}` });
+    const response = await wait;
+
+    if (response?.code === 400) {
+      await surrender();
+      continue;
+    }
+    break;
+  }
+  await delayGo();
+};
+
+const healLocation = async () => {
+  await delayInterface();
+
+  let wait = null;
+  let result = null;
+
+  if (sessionStore.isGiveMonsters) {
+    await backMonster();
+    setSessionStore("isGiveMonsters", false);
+  }
+
+  if (!sessionStore.isMobile) {
+    wait = waitForResponse("/do/pc/heal/poke");
+    await ActionClick.handleHotkey(100);
+    result = await wait;
+  } else {
+    wait = waitForResponse("/do/pc/heal/load");
+    await ActionClick.handleClick({ selector: "#divLocNpc .btnLocHeal" });
+    result = await wait;
+    if (result.code !== 400) {
+      /// пауза перед кликом на хил
+      await delayGo();
+
+      wait = waitForResponse("/do/pc/heal/poke");
+      await ActionClick.handleContextClick({ searchText: "Лечить всех" });
+      await wait;
+    }
+  }
 };

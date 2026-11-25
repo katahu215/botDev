@@ -1,151 +1,95 @@
 import { createStore, produce } from "solid-js/store";
 import autoMonsterIds from "../data/auto_monster.json";
 import { pb } from "./auth";
-
-export type Monster = {
-  id: number;
-  name: string;
-  cat: number;
-};
-interface MonsterTeam {
-  block: number[];
-  count: number;
-}
-interface Drops {
-  items: Record<string, number>;
-  monsters: Record<number, number>;
-}
-interface ShineSettings {
-  catchShine: boolean;
-  useSuperBall: boolean;
-}
-
-export interface UserSettings {
-  attackSkill: number;
-  finishSkill: number;
-  finishMonster: string;
-
-  lvlUpSkill: number;
-  lvlUpMonster: string;
-  maxLvl: number;
-
-  skillCatch: number;
-  skillWeather: number;
-  skillStatus: number;
-  catchMonster: string;
-  monsterBall: number;
-  countCatch: number;
-  gender: number[];
-  butterfly: number[];
-  semant: number[];
-  shine: ShineSettings;
-
-  limitHp: number;
-  limitPp: number;
-  useArenaHeal: boolean;
-
-  //
-  alertEnabled: boolean;
-  alertStopBot: boolean;
-
-  autoItem: number;
-  halloween: any; //object
-}
-
-export interface GameSessionState {
-  role: Record<string, boolean>;
-  isRunning: boolean;
-  isMobile: boolean;
-
-  userId: number;
-  userName: string;
-  location: number;
-  monstersTeam: MonsterTeam;
-  drops: Drops;
-  fightData: any;
-  iPoke: any;
-  hPoke: any;
-  isEnded: number;
-  isAgro: boolean;
-  isBackMonster: boolean;
-  timerItem: any; // object
-}
+import type { GameSessionState, Monster, UserSettings } from "../types";
 
 export const win = window as any;
 
-export const [sessionStore, setSessionStore] = createStore<GameSessionState>({
-  role: {
-    isAdmin: false,
-    isDev: false,
-  },
-  isRunning: false,
-  isMobile: false,
-
-  userId: 0,
-  userName: "",
-  location: 0,
-  monstersTeam: {
-    block: [],
-    count: 0,
-  },
-  drops: {
-    items: {},
-    monsters: {},
-  },
-  fightData: null,
-  iPoke: null,
-  hPoke: null,
-  isEnded: 1,
-  isAgro: false,
-  isBackMonster: false,
-  timerItem: {},
-});
-
-export const [settingsStore, setSettingsStore] = createStore<UserSettings>({} as UserSettings);
-export const [monstersStore, setMonstersStore] = createStore<Record<string, Monster>>({});
-
 export const defaultSettings: UserSettings = {
-  attackSkill: 1,
-  finishSkill: 1,
-  finishMonster: "",
+  isDarkTheme: false,
 
-  //
-  lvlUpSkill: 1,
-  lvlUpMonster: "", /// null all
-  maxLvl: 100,
-  //
-
-  skillCatch: 1,
-  skillWeather: 0,
-  skillStatus: 0,
-  catchMonster: "",
-  monsterBall: 1,
-  countCatch: 5,
-  gender: [0],
-  butterfly: [0],
-  semant: [0],
-  shine: {
-    catchShine: false,
-    useSuperBall: false,
+  battle: {
+    attackSkillId: 1,
+    finishSkillId: 1,
+    finishTargetMonsterId: 0,
   },
 
-  ///
+  leveling: {
+    skillId: 1,
+    targetMonsterId: 0,
+    maxLevel: 100,
+  },
 
-  limitHp: 25,
-  limitPp: 0,
-  useArenaHeal: false,
+  catch: {
+    skillId: 1,
+    weatherSkillId: 0,
+    statusSkillId: 0,
+    targetMonsterId: 0,
+    ballId: 1,
+    genderFilter: [0],
+    butterflyFilter: [0],
+    semantFilter: [0],
+    shine: {
+      isEnabled: false,
+      useSuperBall: false,
+    },
+  },
 
-  //
-  alertEnabled: false,
-  alertStopBot: false,
-  //
-  autoItem: 145,
+  survival: {
+    minHpPercent: 25,
+    minPpPercent: 0,
+    useArenaHeal: false,
+  },
+
+  alerts: {
+    isEnabled: true,
+    isStopBotOnAlert: true,
+  },
+
+  automation: {
+    autoItemId: 145,
+    shutdownDelayMin: 1,
+  },
 
   halloween: {
     usePay: true,
     useCandy: true,
   },
 };
+
+export const [sessionStore, setSessionStore] = createStore<GameSessionState>({
+  isEnabled: false,
+  isMobile: false,
+
+  userId: 0,
+  userName: "",
+  permissions: {
+    isAdmin: false,
+    isVip: false,
+  },
+  locationId: 0,
+
+  monstersTeam: {
+    blockedMonsterIds: [],
+    totalCount: 0,
+  },
+  drops: {
+    items: {},
+    monsters: {},
+  },
+
+  battleState: null,
+  activeMonster: null,
+  opponentMonster: null,
+
+  isBattleFinished: true,
+  isAgroLocation: false,
+  isGiveMonsters: false,
+  itemCooldown: 3600,
+});
+export const [settingsStore, setSettingsStore] = createStore<UserSettings>(defaultSettings);
+
+export const [monstersStore, setMonstersStore] = createStore<Record<string, Monster>>({});
 
 export interface RadioOption {
   value: number;
@@ -310,15 +254,6 @@ export const optionsRadioGroup: Record<string, RadioOption[]> = {
   ],
 };
 
-// export const isAdmin = createMemo(() => {
-//   if (sessionStore.role) return true;
-//   return false;
-// });
-// export const isSpecial1 = createMemo(() => {
-//   if (sessionStore.isDev || sessionStore.isAdmin) return true;
-//   return false;
-// });
-
 export const appService = {
   updateMonster: async (id: number, newCat: number) => {
     setMonstersStore(String(id), "cat", newCat);
@@ -375,13 +310,15 @@ export const appService = {
     }
   },
 
-  updateSettings: async <K extends keyof UserSettings>(name: K, value: UserSettings[K] | Partial<UserSettings[K]>) => {
+  updateSettings: async <K extends keyof UserSettings>(name: K, value: UserSettings[K] | Partial<UserSettings[K]>, save: boolean = true) => {
     // Проверяем: если это объект (например, shine), мерджим со старым состоянием
     if (value && typeof value === "object" && !Array.isArray(value)) {
       setSettingsStore(name, (prev: any) => ({ ...prev, ...value }));
     } else {
       setSettingsStore(name, value as any);
     }
+
+    if (!save) return;
 
     const userId = pb.authStore.record?.id;
     if (!userId) return;

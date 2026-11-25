@@ -1,27 +1,30 @@
-import { delay, delayAttack, delayInterface } from "../utils/sleep";
+import { log } from "../utils/logger";
+import { delay, delayInterface } from "../utils/sleep";
 import { settingsStore } from "../utils/store";
 import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
 
-export const Swap = async (targetId: string) => {
+export const swap = async (targetId: number) => {
   let waiter = null;
   let result = null;
 
   for (let i = 0; i < 3; i++) {
-    await delay(2200, 1800);
-
     waiter = waitForResponse("/do/pokes/load/list");
     await ActionClick.handleClick({ selector: "#divFightI .pokemonBoxDummy.clickable, #divFightI .ball.clickable" });
     result = await waiter;
 
     await delayInterface();
 
-    const matchedMonster = result.object.find((m: any) => m.id === Number(targetId) && (m.hp / m.hp_max) * 100 > settingsStore.limitHp);
-    if (!matchedMonster) return false; /// моба нету или на него нельзя сменить
+    const matchedMonster = result.object.find((m: any) => m.id === targetId && (m.hp / m.hp_max) * 100 > settingsStore.survival.minHpPercent);
+    if (!matchedMonster) {
+      log("Монстр для замены отсутствует или мало хп.");
+      return false;
+    }
 
     const monsterIndex = Array.from(document.querySelectorAll(".divContext .divElements .divElement.clickable")).findIndex((m: any) => Number(m.querySelector(".poke")?.getAttribute("data-p-id")) === Number(targetId));
+    if (monsterIndex === -1) continue;
 
-    await delayAttack();
+    await delay(600, 400);
 
     waiter = waitForResponse("/do/fight/switche");
     await ActionClick.handleClick({ selector: ".divContext .divElements .divElement.clickable", index: monsterIndex });
@@ -29,5 +32,6 @@ export const Swap = async (targetId: string) => {
     if (result.code === 500) return true;
   }
 
+  log("Невозможно сменить.");
   return false;
 };

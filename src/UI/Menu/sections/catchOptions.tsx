@@ -6,6 +6,7 @@ import { modalService } from "../../Component/modalService";
 import RadioGroup from "../../Component/Radio";
 import Switcher from "../../Component/Switcher";
 
+const save = (param: string, value: any) => appService.updateSettings("catch", { [param]: value });
 export const getCatchOptions = (pushScreen: (id: number) => void) => [
   {
     id: 30,
@@ -43,13 +44,12 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
             Семанты
           </Button>
         </div>
-        {/* <div class="secondary-text">Ловит яркокрылов: {settingsStore.butterfly.includes(0) ? "всех" : settingsStore.butterfly.join(", ")}</div> */}
 
         <div class="List">
           <Button
             class="Item values"
             iconName="pen"
-            value={settingsStore.catchMonster}
+            value={settingsStore.catch.targetMonsterId}
             onClick={() =>
               modalService.open(Confirm, {
                 title: "Ловец",
@@ -57,20 +57,22 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
                 showInput: true,
                 isNumber: true,
                 inputPlaceholder: "id монстра",
-                initialValue: settingsStore.catchMonster,
-                onConfirm: (value: any) => appService.updateSettings("catchMonster", value),
+                initialValue: settingsStore.catch.targetMonsterId,
+                onConfirm: (value: any) => appService.updateSettings("catch", { targetMonsterId: value }),
               })
             }
           >
             Ловец:
           </Button>
+        </div>
 
-          {/* <div class="secondary-text">Ловец должен быть с атакой Сломанный меч.</div> */}
+        <div class="secondary-text">Пусто - текущим.</div>
 
+        {/* <div class="List">
           <Button
             class="Item values"
             iconName="pen"
-            value={settingsStore.countCatch}
+            value={settingsStore.catch.maxCatch}
             onClick={() =>
               modalService.open(Confirm, {
                 title: "Относить",
@@ -78,15 +80,15 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
                 showInput: true,
                 isNumber: true,
                 inputPlaceholder: "число",
-                initialValue: settingsStore.countCatch,
-                onConfirm: (value: any) => appService.updateSettings("countCatch", value),
+                initialValue: settingsStore.catch.maxCatch,
+                onConfirm: (value: any) => save("maxCatch", value),
               })
             }
           >
             Относить:
           </Button>
         </div>
-        <div class="secondary-text">При 6 монстрах будет относить {settingsStore.countCatch} монстров в центр.</div>
+        <div class="secondary-text">При 6 монстрах будет относить {settingsStore.catch.maxCatch} монстров в центр.</div> */}
       </>
     ),
   },
@@ -95,7 +97,7 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     title: "Погодные атаки",
     children: (
       <div class="List">
-        <RadioGroup options={optionsRadioGroup.skillWeather} value={settingsStore.skillWeather} name="skillWeather" onChange={(val) => appService.updateSettings("skillWeather", val)} />
+        <RadioGroup options={optionsRadioGroup.skillWeather} value={settingsStore.catch.weatherSkillId} name="weatherSkillId" onChange={(val) => appService.updateSettings("catch", { weatherSkillId: val })} />
       </div>
     ),
   },
@@ -105,7 +107,7 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     children: (
       <>
         <div class="List">
-          <RadioGroup options={optionsRadioGroup.skillCatch} value={settingsStore.skillCatch} name="skillCatch" onChange={(val) => appService.updateSettings("skillCatch", val)} />
+          <RadioGroup options={optionsRadioGroup.skillCatch} value={settingsStore.catch.skillId} name="skillId" onChange={(val) => appService.updateSettings("catch", { skillId: val })} />
         </div>
         <div class="secondary-text">Если выбрана атака «Блуждающие огни» или «Семена-пиявки», то при каждой успешной поимке отправляемся лечиться.</div>
       </>
@@ -116,7 +118,7 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     title: "Статусные атаки",
     children: (
       <div class="List">
-        <RadioGroup options={optionsRadioGroup.skillStatus} value={settingsStore.skillStatus} name="skillStatus" onChange={(val) => appService.updateSettings("skillStatus", val)} />
+        <RadioGroup options={optionsRadioGroup.skillStatus} value={settingsStore.catch.statusSkillId} name="statusSkillId" onChange={(val) => appService.updateSettings("catch", { statusSkillId: val })} />
       </div>
     ),
   },
@@ -125,7 +127,7 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     title: "Монстроболы",
     children: (
       <div class="List">
-        <RadioGroup options={optionsRadioGroup.monsterBall} value={settingsStore.monsterBall} name="monsterBall" onChange={(val) => appService.updateSettings("monsterBall", val)} />
+        <RadioGroup options={optionsRadioGroup.monsterBall} value={settingsStore.catch.ballId} name="ballId" onChange={(val) => appService.updateSettings("catch", { ballId: val })} />
       </div>
     ),
   },
@@ -134,7 +136,7 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     title: "Пол",
     children: (
       <div class="List">
-        <CheckboxGroup options={optionsRadioGroup.gender} value={settingsStore.gender} name="gender" onChange={(val) => appService.updateSettings("gender", val)} />
+        <CheckboxGroup options={optionsRadioGroup.gender} value={settingsStore.catch.genderFilter} name="gender" onChange={(val) => appService.updateSettings("catch", { genderFilter: val })} />
       </div>
     ),
   },
@@ -143,7 +145,7 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     title: "Яркокрылы",
     children: (
       <div class="List">
-        <CheckboxGroup options={optionsRadioGroup.butterfly} value={settingsStore.butterfly} name="butterfly" onChange={(val) => appService.updateSettings("butterfly", val)} />
+        <CheckboxGroup options={optionsRadioGroup.butterfly} value={settingsStore.catch.butterflyFilter} name="butterfly" onChange={(val) => appService.updateSettings("catch", { butterflyFilter: val })} />
       </div>
     ),
   },
@@ -152,7 +154,7 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     title: "Семанты",
     children: (
       <div class="List">
-        <CheckboxGroup options={optionsRadioGroup.semant} value={settingsStore.semant} name="semant" onChange={(val) => appService.updateSettings("semant", val)} />
+        <CheckboxGroup options={optionsRadioGroup.semant} value={settingsStore.catch.semantFilter} name="semant" onChange={(val) => save("semantFilter", val)} />
       </div>
     ),
   },
@@ -162,12 +164,22 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
     children: (
       <>
         <div class="List">
-          <Switcher title="Поимка" checked={settingsStore.shine.catchShine} onChange={(val) => appService.updateSettings("shine", { catchShine: val })} class="Item" />{" "}
+          <Switcher
+            title="Поимка"
+            checked={settingsStore.catch.shine.isEnabled}
+            onChange={(val) => appService.updateSettings("catch", { ...settingsStore.catch, shine: { ...settingsStore.catch.shine, isEnabled: val } })}
+            class="Item"
+          />{" "}
         </div>
         <div class="secondary-text">Ловит всех доступных к поимки шайни, супершайни, shadow, escaped на даркбол.</div>
 
         <div class="List">
-          <Switcher title="Супердаркбол" checked={settingsStore.shine.useSuperBall} onChange={(val) => appService.updateSettings("shine", { useSuperBall: val })} class="Item" />{" "}
+          <Switcher
+            title="Супердаркбол"
+            checked={settingsStore.catch.shine.useSuperBall}
+            onChange={(val) => appService.updateSettings("catch", { ...settingsStore.catch, shine: { ...settingsStore.catch.shine, useSuperBall: val } })}
+            class="Item"
+          />{" "}
         </div>
         <div class="secondary-text">Ловит супершайни только на супердаркбол.</div>
       </>

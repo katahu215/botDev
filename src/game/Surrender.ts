@@ -5,8 +5,8 @@ import { toggleAutoConfirm } from "../utils/toggleAutoConfirm";
 import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
 
-export const Surrender = async () => {
-  if (sessionStore.isAgro) {
+export const surrender = async () => {
+  if (sessionStore.isAgroLocation) {
     log("Агрессивная локация.");
     return false;
   }

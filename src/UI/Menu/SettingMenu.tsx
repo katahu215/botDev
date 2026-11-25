@@ -1,4 +1,4 @@
-import { createMemo, createSignal, type JSX } from "solid-js";
+import { createMemo, createSignal, Show, type JSX } from "solid-js";
 import Modal from "../Component/Modal";
 import { VirtualSlider } from "../Component/Slider";
 import Button from "../Component/Button";
@@ -9,6 +9,10 @@ import { getNotificationOptions } from "./sections/notificationOptions";
 import { getHealOptions } from "./sections/healOptions";
 import { getAutoItemOptions } from "./sections/autoItemOptions";
 import { getHalloweenOptions } from "./sections/halloweenOptions";
+import { getTimerOptions } from "./sections/timerOptions";
+import { appService, sessionStore, settingsStore } from "../../utils/store";
+import { toggleTheme } from "../../utils/theme";
+import Switcher from "../Component/Switcher";
 
 export type TestModalProps = {
   id: string;
@@ -52,6 +56,19 @@ const TestModal = (props: TestModalProps): JSX.Element => {
           {/* <Button class="Item" onClick={() => pushScreen(110)} iconName="ghost">
             Хэллоуин
           </Button> */}
+          <Show when={sessionStore.permissions.isAdmin}>
+            <Button class="Item" onClick={() => pushScreen(105)} iconName="timer">
+              Таймер
+            </Button>
+            <Switcher
+              title="Ночной режим"
+              checked={settingsStore.isDarkTheme}
+              onChange={(val) => {
+                (appService.updateSettings("isDarkTheme", val), toggleTheme());
+              }}
+              class="Item"
+            />
+          </Show>
         </div>
       ),
     },
@@ -62,6 +79,7 @@ const TestModal = (props: TestModalProps): JSX.Element => {
     ...getNotificationOptions(),
     ...getHealOptions(),
     ...getAutoItemOptions(),
+    ...getTimerOptions(),
     ...getHalloweenOptions(),
   ];
   const activeScreen = createMemo(() => options.find((opt) => opt.id === history()[history().length - 1]));
