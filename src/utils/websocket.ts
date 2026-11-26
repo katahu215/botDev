@@ -181,6 +181,11 @@ export const waitForResponse = (path: string): Promise<any> => {
 
     const response = await originalFetch.apply(this, args);
 
+    // Не трогаем запросы Firebase и Google
+    if (urlString.includes("googleapis.com") || urlString.includes("firebaseio.com") || urlString.includes("google-analytics.com")) {
+      return response;
+    }
+
     const matchedPath = Array.from(pendingRequests.keys()).find((path) => urlString.includes(path)) || Object.keys(reaction).find((path) => urlString.includes(path));
 
     const clone = response.clone();
@@ -188,25 +193,26 @@ export const waitForResponse = (path: string): Promise<any> => {
     clone
       .text()
       .then((text) => {
-        if (matchedPath) {
-          try {
-            const jsonResponse = JSON.parse(text);
+        if (!matchedPath) return;
 
-            if (reaction[matchedPath]) {
-              reaction[matchedPath](jsonResponse);
-            }
+        try {
+          const jsonResponse = JSON.parse(text);
 
-            if (pendingRequests.has(matchedPath)) {
-              const resolvers = pendingRequests.get(matchedPath);
-              pendingRequests.delete(matchedPath);
-              resolvers?.forEach((resolve) => resolve(jsonResponse));
-            }
-          } catch (e) {
-            console.error("Ошибка парсинга ответа fetch в JSON:", e);
+          if (reaction[matchedPath]) {
+            reaction[matchedPath](jsonResponse);
           }
+
+          if (pendingRequests.has(matchedPath)) {
+            const resolvers = pendingRequests.get(matchedPath);
+            pendingRequests.delete(matchedPath);
+            resolvers?.forEach((resolve) => resolve(jsonResponse));
+          }
+        } catch (e) {
+          console.error("Ошибка парсинга ответа fetch в JSON:", e);
         }
       })
       .catch((e) => {
+        if (e?.name === "AbortError") return;
         console.error("Ошибка чтения текста ответа fetch:", e);
       });
 

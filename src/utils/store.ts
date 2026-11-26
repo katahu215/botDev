@@ -1,7 +1,8 @@
-import { createStore, produce } from "solid-js/store";
+import { createStore, produce, unwrap } from "solid-js/store";
 import autoMonsterIds from "../data/auto_monster.json";
-import { pb } from "./auth";
 import type { GameSessionState, Monster, UserSettings } from "../types";
+import { doc, updateDoc } from "firebase/firestore";
+import { auth, db } from "./auth";
 
 export const win = window as any;
 
@@ -258,21 +259,15 @@ export const appService = {
   updateMonster: async (id: number, newCat: number) => {
     setMonstersStore(String(id), "cat", newCat);
 
-    const userId = pb.authStore.record?.id;
+    const userId = auth.currentUser?.uid;
     if (!userId) return;
 
     try {
-      const plainMonsters = JSON.parse(JSON.stringify(monstersStore));
-
-      const updatedRecord = await pb.collection("users").update(userId, {
-        monster: plainMonsters,
+      await updateDoc(doc(db, "users", userId), {
+        monster: unwrap(monstersStore),
       });
-
-      if (updatedRecord.monster) {
-        setMonstersStore(updatedRecord.monster);
-      }
     } catch (err: any) {
-      console.error("❌ Ошибка при сохранении монстра:", err?.response || err);
+      console.error("❌ Ошибка при сохранении монстра:", err?.code || err);
     }
   },
 
@@ -294,24 +289,19 @@ export const appService = {
       }),
     );
 
-    const userId = pb.authStore.record?.id;
+    const userId = auth.currentUser?.uid;
     if (!userId) return;
 
     try {
-      const plainMonsters = JSON.parse(JSON.stringify(monstersStore));
-
-      const updatedRecord = await pb.collection("users").update(userId, {
-        monster: plainMonsters,
+      await updateDoc(doc(db, "users", userId), {
+        monster: unwrap(monstersStore),
       });
-
-      if (updatedRecord.monster) setMonstersStore(updatedRecord.monster);
     } catch (err: any) {
-      console.error("❌ Ошибка при массовом обновлении:", err?.response || err);
+      console.error("❌ Ошибка при массовом обновлении:", err?.code || err);
     }
   },
 
   updateSettings: async <K extends keyof UserSettings>(name: K, value: UserSettings[K] | Partial<UserSettings[K]>, save: boolean = true) => {
-    // Проверяем: если это объект (например, shine), мерджим со старым состоянием
     if (value && typeof value === "object" && !Array.isArray(value)) {
       setSettingsStore(name, (prev: any) => ({ ...prev, ...value }));
     } else {
@@ -320,14 +310,15 @@ export const appService = {
 
     if (!save) return;
 
-    const userId = pb.authStore.record?.id;
+    const userId = auth.currentUser?.uid;
     if (!userId) return;
 
     try {
-      const plainSettings = JSON.parse(JSON.stringify(settingsStore));
-      await pb.collection("users").update(userId, { setting: plainSettings });
+      await updateDoc(doc(db, "users", userId), {
+        setting: unwrap(settingsStore),
+      });
     } catch (err: any) {
-      console.error("❌ Ошибка сохранения настроек:", err?.response || err);
+      console.error("❌ Ошибка сохранения настроек:", err?.code || err);
     }
   },
 };

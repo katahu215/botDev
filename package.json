@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "pocketbase": "^0.28.1",
+    "firebase": "^13.4.0",
     "sass": "^1.105.2",
     "solid-js": "^1.9.15"
   },
