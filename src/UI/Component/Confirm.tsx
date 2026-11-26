@@ -4,7 +4,7 @@ import Input from "./Input";
 import Modal, { type ModalProps } from "./Modal";
 
 export type ConfirmProps = ModalProps & {
-  onConfirm: (value?: string) => void;
+  onConfirm: (value?: string | number) => void;
   showInput?: boolean;
   text?: string;
   inputPlaceholder?: string;
@@ -17,7 +17,13 @@ const Confirm = (props: ConfirmProps) => {
 
   const handleConfirm = (e?: Event) => {
     e?.preventDefault();
-    props.onConfirm(props.showInput ? inputValue() : undefined);
+    if (!props.showInput) {
+      props.onConfirm(undefined);
+    } else if (props.isNumber) {
+      props.onConfirm(Number(inputValue()) || 0);
+    } else {
+      props.onConfirm(inputValue());
+    }
     props.onClose?.();
   };
 
