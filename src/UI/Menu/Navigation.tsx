@@ -9,6 +9,7 @@ import { toggleDropMenu } from "./DropMenu";
 import { toggleSwitch } from "../../utils/toggleSwitch";
 import { createSignal, Show } from "solid-js";
 import { shutdownGame } from "../../game/utils/shutdownGame";
+import { heal } from "../../game/heal";
 
 const [navigationOpen, setNavigationMenuOpen] = createSignal(false);
 export const toggleNavigationMenu = () => setNavigationMenuOpen((v) => !v);
@@ -63,6 +64,9 @@ const NavigationMenu = () => {
         </Button>
         <Show when={sessionStore.permissions.isAdmin}>
           <Button class="Item" iconName="bug" onClick={() => shutdownGame()}></Button>
+          <Button class="Item" iconName="bug" onClick={() => heal()}>
+            Хил
+          </Button>
         </Show>
       </div>
     </div>
