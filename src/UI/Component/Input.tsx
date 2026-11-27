@@ -23,7 +23,7 @@ const Input = (props: InputProps) => {
     return String(val);
   };
 
-  const handleInput = (e: InputEvent & { currentTarget: HTMLInputElement }) => {
+  const handleInput: JSX.InputEventHandler<HTMLInputElement, InputEvent> = (e) => {
     let val = e.currentTarget.value;
 
     if (props.isNumber) {

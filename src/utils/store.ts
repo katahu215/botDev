@@ -255,70 +255,76 @@ export const optionsRadioGroup: Record<string, RadioOption[]> = {
   ],
 };
 
+async function saveToDb(data: Record<string, any>, errorLabel: string) {
+  const userId = auth.currentUser?.uid;
+  if (!userId) {
+    console.warn("⚠️ saveToDb: нет userId");
+    return;
+  }
+
+  console.log("📤 saveToDb payload:", {
+    errorLabel,
+    typeOfSetting: typeof data.setting,
+    isArray: Array.isArray(data.setting),
+    keys: data.setting && typeof data.setting === "object" ? Object.keys(data.setting) : null,
+    setting: data.setting,
+  });
+
+  try {
+    await updateDoc(doc(db, "users", userId), data);
+    console.log("✅ saveToDb success:", errorLabel);
+  } catch (err: any) {
+    console.error(`❌ ${errorLabel}:`, err?.code || err);
+  }
+}
+
+type UpdateOptions = { save?: boolean };
+
+async function updateSetting(...args: [...string[], any] | [...string[], any, UpdateOptions]) {
+  const last = args[args.length - 1];
+  const hasOptions = typeof last === "object" && last !== null && !Array.isArray(last) && "save" in last;
+
+  const save = hasOptions ? Boolean((last as UpdateOptions).save) : true;
+  const storeArgs = hasOptions ? args.slice(0, -1) : args;
+
+  if (storeArgs.length < 2) {
+    console.error("❌ Недостаточно аргументов для updateSetting:", storeArgs);
+    return;
+  }
+
+  (setSettingsStore as any)(...storeArgs);
+
+  if (save) {
+    await saveToDb({ setting: unwrap(settingsStore) }, "Ошибка сохранения настроек");
+  }
+}
+
 export const appService = {
-  updateMonster: async (id: number, newCat: number) => {
+  updateMonster(id: number, newCat: number) {
     setMonstersStore(String(id), "cat", newCat);
-
-    const userId = auth.currentUser?.uid;
-    if (!userId) return;
-
-    try {
-      await updateDoc(doc(db, "users", userId), {
-        monster: unwrap(monstersStore),
-      });
-    } catch (err: any) {
-      console.error("❌ Ошибка при сохранении монстра:", err?.code || err);
-    }
+    return saveToDb({ monster: unwrap(monstersStore) }, "Ошибка при сохранении монстра");
   },
 
-  updateAllMonster: async (reset: boolean) => {
+  updateAllMonster(reset: boolean) {
     setMonstersStore(
       produce((store) => {
         if (reset) {
           for (const key of Object.keys(store)) {
             store[key].cat = 1;
           }
-        } else {
-          for (const id of autoMonsterIds) {
-            const stringId = String(id);
-            if (store[stringId]) {
-              store[stringId].cat = 2;
-            }
-          }
+          return;
+        }
+
+        for (const id of autoMonsterIds) {
+          const entry = store[String(id)];
+          if (entry) entry.cat = 2;
         }
       }),
     );
 
-    const userId = auth.currentUser?.uid;
-    if (!userId) return;
-
-    try {
-      await updateDoc(doc(db, "users", userId), {
-        monster: unwrap(monstersStore),
-      });
-    } catch (err: any) {
-      console.error("❌ Ошибка при массовом обновлении:", err?.code || err);
-    }
+    return saveToDb({ monster: unwrap(monstersStore) }, "Ошибка при массовом обновлении");
   },
 
-  updateSettings: async <K extends keyof UserSettings>(name: K, value: UserSettings[K] | Partial<UserSettings[K]>, save: boolean = true) => {
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      setSettingsStore(name, (prev: any) => ({ ...prev, ...value }));
-    } else {
-      setSettingsStore(name, value as any);
-    }
-
-    if (!save) return;
-
-    const userId = auth.currentUser?.uid;
-    if (!userId) return;
-
-    try {
-      await updateDoc(doc(db, "users", userId), {
-        setting: unwrap(settingsStore),
-      });
-    } catch (err: any) {
-      console.error("❌ Ошибка сохранения настроек:", err?.code || err);
-    }
-  },
+  setSetting: setSettingsStore,
+  updateSetting,
 };

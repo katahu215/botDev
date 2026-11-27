@@ -7,8 +7,9 @@ export const getHalloweenOptions = () => [
     title: "Хэллоуин",
     children: (
       <div class="List">
-        <Switcher title="Отдавать деньги" checked={settingsStore.halloween.usePay} onChange={(val) => appService.updateSettings("halloween", { usePay: val })} class="Item" />
-        <Switcher title="Ловить конфеты" checked={settingsStore.halloween.useCandy} onChange={(val) => appService.updateSettings("halloween", { useCandy: val })} class="Item" />
+        <Switcher title="Отдавать деньги" checked={settingsStore.halloween.usePay} onChange={(value) => appService.updateSetting("halloween", "usePay", value)} class="Item" />
+
+        <Switcher title="Ловить конфеты" checked={settingsStore.halloween.useCandy} onChange={(value) => appService.updateSetting("halloween", "useCandy", value)} class="Item" />
       </div>
     ),
   },

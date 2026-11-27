@@ -27,19 +27,21 @@
   --color-prime: rgb(79 92 255);
   --color-secondary: rgb(112, 117, 121);
   --color-bg: rgb(242, 242, 242);
+  --color-bg-nav: --color-bg;
   --color-list: white;
   --color-text: black;
   --color--widget: var(--color-hover);
 }
 
-#app-root[data-theme="dark"] {
+:host([data-theme="dark"]) {
   --color-text: white;
   --color-icon: rgb(171, 175, 177);
   --color-hover: rgba(0, 0, 0, 0.4);
-  --color-separator: rgb(0, 0, 0, 0.10196);
+  --color-separator: rgba(255, 255, 255, 0.10196);
   --color-prime: rgb(79 92 255);
   --color-secondary: rgb(170, 170, 170);
   --color-bg: rgb(33, 33, 33);
+  --color-bg-nav: rgb(44, 44, 44);
   --color-list: rgb(44, 44, 44);
   --color--widget: rgb(113, 117, 121);
 }
@@ -65,12 +67,6 @@ button {
   font-family: "Roboto", sans-serif;
   font-size: var(--font-small);
   color: var(--color-text);
-
-  // button,
-  // a.clickable,
-  // input {
-  //   pointer-events: auto;
-  // }
 }
 
 .Item {
@@ -110,7 +106,7 @@ button {
     display: flex;
     padding: 0.25rem;
     border-radius: 1rem;
-    background-color: var(--color-bg);
+    background-color: var(--color-bg-nav);
     box-shadow: 0 1px 5px -1px rgb(0 0 0 / 0.36);
     transition:
       transform 0.2s cubic-bezier(0.2, 0, 0.2, 1),

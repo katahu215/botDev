@@ -8,8 +8,17 @@ export const getNotificationOptions = () => [
     children: (
       <>
         <div class="List">
-          <Switcher title="Уведомления" checked={settingsStore.alerts.isEnabled} onChange={(val) => appService.updateSettings("alerts", { isEnabled: val })} class="Item" />
-          <Switcher title="Остановить" checked={settingsStore.alerts.isStopBotOnAlert} onChange={(val) => appService.updateSettings("alerts", { isStopBotOnAlert: val })} class="Item" />
+          <Switcher
+            title="Уведомления"
+            checked={settingsStore.alerts.isEnabled}
+            onChange={(value) => {
+              console.log(value);
+              appService.updateSetting("alerts", "isEnabled", value);
+            }}
+            class="Item"
+          />
+
+          <Switcher title="Остановить" checked={settingsStore.alerts.isStopBotOnAlert} onChange={(value) => appService.updateSetting("alerts", "isStopBotOnAlert", value)} class="Item" />
         </div>
         <div class="secondary-text">Остановит работу если кто-то написал.</div>
       </>

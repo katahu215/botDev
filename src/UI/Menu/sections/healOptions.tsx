@@ -22,13 +22,14 @@ export const getHealOptions = () => [
               isNumber: true,
               inputPlaceholder: "число",
               initialValue: settingsStore.survival.minHpPercent,
-              onConfirm: (value: any) => appService.updateSettings("survival", { minHpPercent: value }),
+              onConfirm: (value: any) => appService.updateSetting("survival", "minHpPercent", value),
             })
           }
         >
           Процент для лечения:
         </Button>
-        <Switcher title="Через арену ЛЧ" checked={settingsStore.survival.useArenaHeal} onChange={(val) => appService.updateSettings("survival", { useArenaHeal: val })} class="Item" />
+
+        <Switcher title="Через арену ЛЧ" checked={settingsStore.survival.useArenaHeal} onChange={(value) => appService.updateSetting("survival", "useArenaHeal", value)} class="Item" />
       </div>
     ),
   },

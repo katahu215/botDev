@@ -4,26 +4,20 @@ import Input from "./Input";
 import Modal, { type ModalProps } from "./Modal";
 
 export type ConfirmProps = ModalProps & {
-  onConfirm: (value?: string | number) => void;
+  onConfirm: (value?: number) => void;
   showInput?: boolean;
   text?: string;
   inputPlaceholder?: string;
-  isNumber?: boolean;
-  initialValue?: string;
+  initialValue?: number;
 };
 
 const Confirm = (props: ConfirmProps) => {
-  const [inputValue, setInputValue] = createSignal(props.initialValue ?? "");
+  const initialDisplay = props.initialValue ? String(props.initialValue) : "";
+  const [inputValue, setInputValue] = createSignal(initialDisplay);
 
   const handleConfirm = (e?: Event) => {
     e?.preventDefault();
-    if (!props.showInput) {
-      props.onConfirm(undefined);
-    } else if (props.isNumber) {
-      props.onConfirm(Number(inputValue()) || 0);
-    } else {
-      props.onConfirm(inputValue());
-    }
+    props.onConfirm(props.showInput ? Number(inputValue()) || 0 : undefined);
     props.onClose?.();
   };
 
@@ -38,7 +32,7 @@ const Confirm = (props: ConfirmProps) => {
           </Show>
           <form onSubmit={handleConfirm} class="confirm-content">
             <Show when={props.showInput}>
-              <Input value={inputValue()} onInput={setInputValue} placeholder={props.inputPlaceholder} isNumber={props.isNumber} />
+              <Input value={inputValue()} onInput={setInputValue} placeholder={props.inputPlaceholder} isNumber />
             </Show>
 
             <div class="button-container">

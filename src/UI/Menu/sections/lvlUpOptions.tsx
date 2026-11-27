@@ -24,7 +24,7 @@ export const getLvlUpOptions = (pushScreen: (id: number) => void) => [
                 isNumber: true,
                 inputPlaceholder: "id монстра",
                 initialValue: settingsStore.leveling.targetMonsterId,
-                onConfirm: (value: any) => appService.updateSettings("leveling", { targetMonsterId: value }, false), // false - не обновлять в программе
+                onConfirm: (value: any) => appService.setSetting("leveling", "targetMonsterId", value), //  не обновлять в базе
               })
             }
           >
@@ -42,7 +42,7 @@ export const getLvlUpOptions = (pushScreen: (id: number) => void) => [
                 isNumber: true,
                 inputPlaceholder: "число",
                 initialValue: settingsStore.leveling.maxLevel,
-                onConfirm: (value: any) => appService.updateSettings("leveling", { maxLevel: value }),
+                onConfirm: (value: any) => appService.updateSetting("leveling", "maxLevel", value),
               })
             }
           >
@@ -62,7 +62,7 @@ export const getLvlUpOptions = (pushScreen: (id: number) => void) => [
     title: "Атаки",
     children: (
       <div class="List">
-        <RadioGroup options={optionsRadioGroup.lvlUpSkill} value={settingsStore.leveling.skillId} name="lvlUpSkill" onChange={(val) => appService.updateSettings("leveling", { skillId: val })} />
+        <RadioGroup options={optionsRadioGroup.lvlUpSkill} value={settingsStore.leveling.skillId} name="lvlUpSkill" onChange={(value) => appService.updateSetting("leveling", "skillId", value)} />
       </div>
     ),
   },

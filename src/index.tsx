@@ -2,6 +2,8 @@
 import { render } from "solid-js/web";
 import App from "./App.tsx";
 import styles from "./index.scss?inline";
+import { createEffect } from "solid-js";
+import { settingsStore } from "./utils/store.ts";
 
 const fontStyleTag = document.createElement("style");
 fontStyleTag.textContent = `
@@ -39,5 +41,12 @@ export const appContainer = document.createElement("div");
 appContainer.id = "app-root";
 shadowRoot.appendChild(appContainer);
 
+createEffect(() => {
+  if (settingsStore.isDarkTheme) {
+    rootElement.setAttribute("data-theme", "dark");
+  } else {
+    rootElement.removeAttribute("data-theme");
+  }
+});
 document.body.appendChild(rootElement);
 render(() => <App />, appContainer);

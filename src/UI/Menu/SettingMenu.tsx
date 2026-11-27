@@ -5,14 +5,12 @@ import Button from "../Component/Button";
 import { getFightOptions } from "./sections/fightOption";
 import { getLvlUpOptions } from "./sections/lvlUpOptions";
 import { getCatchOptions } from "./sections/catchOptions";
-import { getNotificationOptions } from "./sections/notificationOptions";
 import { getHealOptions } from "./sections/healOptions";
 import { getAutoItemOptions } from "./sections/autoItemOptions";
 import { getHalloweenOptions } from "./sections/halloweenOptions";
-import { getTimerOptions } from "./sections/timerOptions";
-import { appService, sessionStore, settingsStore } from "../../utils/store";
-import { toggleTheme } from "../../utils/theme";
-import Switcher from "../Component/Switcher";
+import { sessionStore } from "../../utils/store";
+import { modalService } from "../Component/modalService";
+import { ExtraMenu } from "./ExtmaMenu";
 
 export type TestModalProps = {
   id: string;
@@ -49,25 +47,15 @@ const TestModal = (props: TestModalProps): JSX.Element => {
           <Button class="Item" onClick={() => pushScreen(99)} iconName="auto-item">
             Автоинвентарь
           </Button>
-          <Button class="Item" onClick={() => pushScreen(40)} iconName="bell">
-            Уведомления
+          <Button class="Item" onClick={() => modalService.open(ExtraMenu)} iconName="list">
+            Дополнительно
           </Button>
 
           {/* <Button class="Item" onClick={() => pushScreen(110)} iconName="ghost">
             Хэллоуин
           </Button> */}
           <Show when={sessionStore.permissions.isAdmin}>
-            <Button class="Item" onClick={() => pushScreen(105)} iconName="timer">
-              Таймер
-            </Button>
-            <Switcher
-              title="Ночной режим"
-              checked={settingsStore.isDarkTheme}
-              onChange={(val) => {
-                (appService.updateSettings("isDarkTheme", val), toggleTheme());
-              }}
-              class="Item"
-            />
+            <></>
           </Show>
         </div>
       ),
@@ -76,10 +64,10 @@ const TestModal = (props: TestModalProps): JSX.Element => {
     ...getFightOptions(pushScreen),
     ...getLvlUpOptions(pushScreen),
     ...getCatchOptions(pushScreen),
-    ...getNotificationOptions(),
+
     ...getHealOptions(),
     ...getAutoItemOptions(),
-    ...getTimerOptions(),
+
     ...getHalloweenOptions(),
   ];
   const activeScreen = createMemo(() => options.find((opt) => opt.id === history()[history().length - 1]));
