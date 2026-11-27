@@ -1,5 +1,5 @@
-import { delayInterface } from "./sleep";
-import { sessionStore } from "./store";
+import { delayInterface } from "../../utils/sleep";
+import { sessionStore } from "../../utils/store";
 
 export const toggleSwitch = async (pressed: boolean) => {
   let button = null;

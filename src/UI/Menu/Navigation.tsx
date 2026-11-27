@@ -6,10 +6,10 @@ import MonstersMenu from "./MonstersMenu";
 import { sessionStore, setSessionStore } from "../../utils/store";
 import { mainController } from "../../game/mainContoller";
 import { toggleDropMenu } from "./DropMenu";
-import { toggleSwitch } from "../../utils/toggleSwitch";
 import { createSignal, Show } from "solid-js";
-import { shutdownGame } from "../../game/utils/shutdownGame";
+import { shutdownGame } from "../../utils/shutdownGame";
 import { heal } from "../../game/heal";
+import { toggleSwitch } from "../../game/utils/toggleSwitch";
 
 const [navigationOpen, setNavigationMenuOpen] = createSignal(false);
 export const toggleNavigationMenu = () => setNavigationMenuOpen((v) => !v);

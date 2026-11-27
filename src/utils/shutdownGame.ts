@@ -1,5 +1,5 @@
-import { setSessionStore, settingsStore } from "../../utils/store";
-import { clearAutoItemTimer } from "./autoItem";
+import { setSessionStore, settingsStore } from "./store";
+import { clearAutoItemTimer } from "../game/utils/autoItem";
 
 let timeoutId: ReturnType<typeof setTimeout> | null = null;
 

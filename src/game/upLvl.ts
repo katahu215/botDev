@@ -1,14 +1,14 @@
-import { findAttack } from "../utils/findAttack";
+import { findAttack } from "./utils/findAttack";
 import { handleActiveBattle } from "../utils/handleActiveBattle";
 import { log } from "../utils/logger";
-import { shouldHeal } from "../utils/shouldHeal";
+import { shouldHeal } from "./utils/shouldHeal";
 import { delayAttack } from "../utils/sleep";
 import { optionsRadioGroup, settingsStore, sessionStore } from "../utils/store";
-import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
 import { Attack } from "./Attack";
 import { heal } from "./heal";
 import { swap } from "./swap";
+import { ActionClick } from "./utils/useClick";
 
 export const upLvl = async () => {
   let waiter = null;

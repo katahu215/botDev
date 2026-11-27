@@ -1,9 +1,9 @@
 import { log } from "../utils/logger";
 import { delayAttack } from "../utils/sleep";
 import { sessionStore } from "../utils/store";
-import { toggleAutoConfirm } from "../utils/toggleAutoConfirm";
-import { ActionClick } from "../utils/useClick";
+import { toggleAutoConfirm } from "./utils/toggleAutoConfirm";
 import { waitForResponse } from "../utils/websocket";
+import { ActionClick } from "./utils/useClick";
 
 export const surrender = async () => {
   if (sessionStore.isAgroLocation) {

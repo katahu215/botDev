@@ -1,7 +1,8 @@
-import { delayInterface } from "./sleep";
-import { sessionStore } from "./store";
+import { delayInterface } from "../../utils/sleep";
+import { sessionStore } from "../../utils/store";
+
+import { waitForResponse } from "../../utils/websocket";
 import { ActionClick } from "./useClick";
-import { waitForResponse } from "./websocket";
 
 export const toggleTeam = async (close?: boolean) => {
   const waiter = waitForResponse("/do/pokes/load/team");

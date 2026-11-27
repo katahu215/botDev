@@ -1,6 +1,6 @@
+import { delay } from "../../utils/sleep";
+import { sessionStore, win } from "../../utils/store";
 import { resolveCaptcha } from "./captcha";
-import { delay } from "./sleep";
-import { sessionStore, win } from "./store";
 
 type ClickOptions = {
   index?: number;

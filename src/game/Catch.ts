@@ -8,14 +8,14 @@
 
 import { heal } from "./heal";
 import { swap } from "./swap";
-import { findAttack } from "../utils/findAttack";
+import { findAttack } from "./utils/findAttack";
 import { log } from "../utils/logger";
-import { toggleTeam } from "../utils/openTeam";
+import { toggleTeam } from "./utils/openTeam";
 import { delay, delayAttack, delayInterface } from "../utils/sleep";
 import { optionsRadioGroup, sessionStore, setSessionStore, settingsStore } from "../utils/store";
-import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
 import { Attack } from "./Attack";
+import { ActionClick } from "./utils/useClick";
 
 const STATUS_MAP: Record<number, number> = { 1: 15, 2: 15, 3: 15, 4: 15, 5: 15, 6: 12, 7: 12, 8: 12, 9: 9, 10: 56 }; // ключ, значение
 

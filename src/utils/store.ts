@@ -258,21 +258,11 @@ export const optionsRadioGroup: Record<string, RadioOption[]> = {
 async function saveToDb(data: Record<string, any>, errorLabel: string) {
   const userId = auth.currentUser?.uid;
   if (!userId) {
-    console.warn("⚠️ saveToDb: нет userId");
     return;
   }
 
-  console.log("📤 saveToDb payload:", {
-    errorLabel,
-    typeOfSetting: typeof data.setting,
-    isArray: Array.isArray(data.setting),
-    keys: data.setting && typeof data.setting === "object" ? Object.keys(data.setting) : null,
-    setting: data.setting,
-  });
-
   try {
     await updateDoc(doc(db, "users", userId), data);
-    console.log("✅ saveToDb success:", errorLabel);
   } catch (err: any) {
     console.error(`❌ ${errorLabel}:`, err?.code || err);
   }

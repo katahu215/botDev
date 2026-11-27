@@ -1,9 +1,9 @@
 import { log } from "../../utils/logger";
 import { delay, delayInterface } from "../../utils/sleep";
 import { sessionStore, settingsStore } from "../../utils/store";
-import { toggleSwitch } from "../../utils/toggleSwitch";
-import { ActionClick } from "../../utils/useClick";
 import { waitForResponse } from "../../utils/websocket";
+import { toggleSwitch } from "./toggleSwitch";
+import { ActionClick } from "./useClick";
 
 let isRunning = false;
 let timeoutId: ReturnType<typeof setTimeout> | null = null;

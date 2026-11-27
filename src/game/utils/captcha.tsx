@@ -1,7 +1,7 @@
-import type { ModalProps } from "../UI/Component/Modal";
-import Modal from "../UI/Component/Modal";
-import { modalService } from "../UI/Component/modalService";
-import { delay } from "./sleep";
+import type { ModalProps } from "../../UI/Component/Modal";
+import Modal from "../../UI/Component/Modal";
+import { modalService } from "../../UI/Component/modalService";
+import { delay } from "../../utils/sleep";
 
 // Главная точка входа: проверяем наличие капчи на странице
 export const resolveCaptcha = async () => {

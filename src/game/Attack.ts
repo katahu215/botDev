@@ -1,11 +1,11 @@
-import { findAttack } from "../utils/findAttack";
+import { findAttack } from "./utils/findAttack";
 import { handleActiveBattle } from "../utils/handleActiveBattle";
-import { shouldHeal } from "../utils/shouldHeal";
+import { shouldHeal } from "./utils/shouldHeal";
 import { delayAttack } from "../utils/sleep";
 import { sessionStore } from "../utils/store";
-import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
 import { heal } from "./heal";
+import { ActionClick } from "./utils/useClick";
 
 interface AttackParams {
   targetAttack: number | string;

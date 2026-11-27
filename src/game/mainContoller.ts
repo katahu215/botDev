@@ -2,12 +2,12 @@ import { monstersStore, sessionStore, settingsStore } from "../utils/store";
 
 import { log } from "../utils/logger";
 
-import { toggleSwitch } from "../utils/toggleSwitch";
 import { Attack } from "./Attack";
 import { upLvl } from "./upLvl";
 import { comboAttack } from "../testFunction/testUtils";
 import { surrender } from "./surrender";
 import { catchAttack } from "./catch";
+import { toggleSwitch } from "./utils/toggleSwitch";
 
 const reaction: Record<number, () => void> = {
   1: () => () => log("Напал редкий монстр."),

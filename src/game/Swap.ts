@@ -1,8 +1,8 @@
 import { log } from "../utils/logger";
 import { delay, delayInterface } from "../utils/sleep";
 import { settingsStore } from "../utils/store";
-import { ActionClick } from "../utils/useClick";
 import { waitForResponse } from "../utils/websocket";
+import { ActionClick } from "./utils/useClick";
 
 export const swap = async (targetId: number) => {
   let waiter = null;

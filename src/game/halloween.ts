@@ -1,4 +1,4 @@
-import { ActionClick } from "../utils/useClick";
+import { ActionClick } from "./utils/useClick";
 
 // Хел готов и работает
 export const payHalloween = async () => {

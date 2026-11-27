@@ -1,4 +1,4 @@
-import { sessionStore, settingsStore } from "./store";
+import { sessionStore, settingsStore } from "../../utils/store";
 
 export type PokemonMove = {
   id: number;

@@ -1,12 +1,12 @@
-import { toggleTeam } from "../utils/openTeam.ts";
+import { toggleTeam } from "./utils/openTeam.ts";
 import { delay, delayGo, delayInterface } from "../utils/sleep.ts";
 import { sessionStore, setSessionStore, settingsStore } from "../utils/store.js";
-import { toggleAutoConfirm } from "../utils/toggleAutoConfirm.ts";
-import { ActionClick } from "../utils/useClick.js";
+import { toggleAutoConfirm } from "./utils/toggleAutoConfirm.ts";
 import { waitForResponse } from "../utils/websocket.ts";
-import { toggleSwitch } from "../utils/toggleSwitch.ts";
 import { log } from "../utils/logger.ts";
 import { surrender } from "./surrender.ts";
+import { toggleSwitch } from "./utils/toggleSwitch.ts";
+import { ActionClick } from "./utils/useClick.ts";
 
 interface HealRoutesMap {
   [locationId: number]: {

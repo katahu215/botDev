@@ -1,4 +1,4 @@
-import { shutdownGame } from "../../../game/utils/shutdownGame";
+import { shutdownGame } from "../../../utils/shutdownGame";
 import { appService, settingsStore } from "../../../utils/store";
 import Button from "../../Component/Button";
 import Confirm from "../../Component/Confirm";

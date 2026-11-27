@@ -1,4 +1,4 @@
-import { sessionStore, settingsStore } from "./store";
+import { sessionStore, settingsStore } from "../../utils/store";
 interface ShouldHealOptions {
   currentHp?: number;
   setMaxHp?: number;
