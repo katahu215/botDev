@@ -27,7 +27,7 @@
   --color-prime: rgb(79 92 255);
   --color-secondary: rgb(112, 117, 121);
   --color-bg: rgb(242, 242, 242);
-  --color-bg-nav: --color-bg;
+  --color-bg-nav: var(--color-bg);
   --color-list: white;
   --color-text: black;
   --color--widget: var(--color-hover);
