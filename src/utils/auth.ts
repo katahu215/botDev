@@ -34,6 +34,21 @@ let isRegistering = false;
 const normalizeUsername = (name: string) => name.trim().toLowerCase();
 const toSyntheticEmail = (normalizedName: string) => `${normalizedName}@users.local`;
 
+const mergeMonsters = (userMonsters: Record<string, any> | undefined | null) => {
+  const defaults = defaultMonsters as Record<string, any>;
+  const merged: Record<string, any> = { ...(userMonsters ?? {}) };
+  let hasMissing = false;
+
+  for (const id of Object.keys(defaults)) {
+    if (merged[id] === undefined) {
+      merged[id] = { ...defaults[id] };
+      hasMissing = true;
+    }
+  }
+
+  return { merged, hasMissing };
+};
+
 const syncData = async (uid: string, record: any) => {
   if (record.setting) {
     const userSettings = record.setting;
@@ -75,7 +90,20 @@ const syncData = async (uid: string, record: any) => {
   }
 
   if (record.monster) {
-    setMonstersStore(record.monster);
+    const { merged, hasMissing } = mergeMonsters(record.monster);
+    setMonstersStore(merged);
+
+    if (hasMissing) {
+      updateDoc(doc(db, "users", uid), {
+        monster: unwrap(merged),
+      }).catch((err) => console.error("Не удалось синхронизировать монстров с базой:", err));
+    }
+  } else {
+    // если у юзера вообще нет поля monster — заливаем весь дефолт
+    setMonstersStore(defaultMonsters);
+    updateDoc(doc(db, "users", uid), {
+      monster: defaultMonsters,
+    }).catch((err) => console.error("Не удалось синхронизировать монстров с базой:", err));
   }
 };
 
