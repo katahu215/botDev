@@ -198,3 +198,20 @@ button {
     }
   }
 }
+
+.Combo {
+  .List {
+    display: flex;
+    justify-content: space-between;
+    text-wrap: nowrap;
+  }
+
+  .Button {
+    position: static;
+  }
+  .buttons-container {
+    .Button {
+      justify-content: center;
+    }
+  }
+}

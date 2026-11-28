@@ -11,6 +11,7 @@ import { getHalloweenOptions } from "./sections/halloweenOptions";
 import { sessionStore } from "../../utils/store";
 import { modalService } from "../Component/modalService";
 import { ExtraMenu } from "./ExtmaMenu";
+import { ComboMenu } from "./ComboMenu.tsx";
 
 export type TestModalProps = {
   id: string;
@@ -40,6 +41,9 @@ const TestModal = (props: TestModalProps): JSX.Element => {
           </Button>
           <Button class="Item" onClick={() => pushScreen(30)} iconName="fishing">
             Ловля
+          </Button>
+          <Button class="Item" onClick={() => modalService.open(ComboMenu)} iconName="routes">
+            Комбо
           </Button>
           <Button class="Item" onClick={() => pushScreen(100)} iconName="heal">
             Лечение

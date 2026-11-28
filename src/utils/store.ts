@@ -56,6 +56,36 @@ export const defaultSettings: UserSettings = {
     usePay: true,
     useCandy: true,
   },
+  combo: {
+    1: {
+      steps: [
+        { type: "attack", id: 1, attempts: 1, status: 0 },
+        { type: "swap", id: 0 },
+      ],
+      isHeal: true,
+    },
+    2: {
+      steps: [
+        { type: "attack", id: 1, attempts: 1, status: 0 },
+        { type: "swap", id: 0 },
+      ],
+      isHeal: true,
+    },
+    3: {
+      steps: [
+        { type: "attack", id: 1, attempts: 1, status: 0 },
+        { type: "swap", id: 0 },
+      ],
+      isHeal: true,
+    },
+    4: {
+      steps: [
+        { type: "attack", id: 1, attempts: 1, status: 0 },
+        { type: "swap", id: 0 },
+      ],
+      isHeal: true,
+    },
+  },
 };
 
 export const [sessionStore, setSessionStore] = createStore<GameSessionState>({
@@ -135,6 +165,12 @@ export const optionsRadioGroup: Record<string, RadioOption[]> = {
     { value: 8, label: "Оцепенение" },
     { value: 9, label: "Путы" },
     { value: 10, label: "Насмешка" },
+    { value: 0, label: "Не использовать" },
+  ],
+  skillCombo: [
+    { value: 1, label: "Отравление" },
+    { value: 2, label: "Блуждающие огни" },
+    { value: 3, label: "Семена-пиявки" },
     { value: 0, label: "Не использовать" },
   ],
   weather: [
@@ -255,7 +291,8 @@ export const optionsRadioGroup: Record<string, RadioOption[]> = {
   ],
 };
 
-async function saveToDb(data: Record<string, any>, errorLabel: string) {
+type UpdateOptions = { save?: boolean };
+const saveToDb = async (data: Record<string, any>, errorLabel: string) => {
   const userId = auth.currentUser?.uid;
   if (!userId) {
     return;
@@ -266,11 +303,9 @@ async function saveToDb(data: Record<string, any>, errorLabel: string) {
   } catch (err: any) {
     console.error(`❌ ${errorLabel}:`, err?.code || err);
   }
-}
+};
 
-type UpdateOptions = { save?: boolean };
-
-async function updateSetting(...args: [...string[], any] | [...string[], any, UpdateOptions]) {
+const updateSetting = async (...args: [...string[], any] | [...string[], any, UpdateOptions]) => {
   const last = args[args.length - 1];
   const hasOptions = typeof last === "object" && last !== null && !Array.isArray(last) && "save" in last;
 
@@ -287,7 +322,7 @@ async function updateSetting(...args: [...string[], any] | [...string[], any, Up
   if (save) {
     await saveToDb({ setting: unwrap(settingsStore) }, "Ошибка сохранения настроек");
   }
-}
+};
 
 export const appService = {
   updateMonster(id: number, newCat: number) {

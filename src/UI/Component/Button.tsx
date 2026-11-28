@@ -18,7 +18,10 @@ const Button = (props: ButtonProps) => {
       <Show when={props.iconName}>
         <Icon name={props.iconName} />
       </Show>
-      {props.children}
+      <Show when={props.value} fallback={props.children}>
+        <span class="label">{props.children}</span>
+      </Show>
+
       <Show when={props.value}>
         <span class="value">{props.value}</span>
       </Show>

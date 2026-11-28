@@ -15,6 +15,9 @@
       top: 0;
     }
   }
+  &.icon {
+    width: auto;
+  }
   &.close {
     padding: 0.125rem;
   }
@@ -28,6 +31,9 @@
   }
   &.cn {
     justify-content: center;
+  }
+  &.prime {
+    color: var(--color-prime);
   }
 
   &.startBtn {
@@ -49,9 +55,19 @@
     background-color: var(--color-hover);
   }
 
+  .label {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
   .value {
     font-size: var(--font-x-small);
     color: var(--color-secondary);
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 

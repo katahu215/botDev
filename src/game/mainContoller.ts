@@ -4,10 +4,11 @@ import { log } from "../utils/logger";
 
 import { Attack } from "./Attack";
 import { upLvl } from "./upLvl";
-import { comboAttack } from "../testFunction/testUtils";
+
 import { surrender } from "./surrender";
 import { catchAttack } from "./catch";
 import { toggleSwitch } from "./utils/toggleSwitch";
+import { comboAttack } from "./ComboAttack";
 
 const reaction: Record<number, () => void> = {
   1: () => () => log("Напал редкий монстр."),
@@ -18,6 +19,10 @@ const reaction: Record<number, () => void> = {
   6: () => Attack({ targetAttack: 2 }),
   7: () => Attack({ targetAttack: 3 }),
   8: () => Attack({ targetAttack: 4 }),
+  9: () => comboAttack(1),
+  10: () => comboAttack(2),
+  11: () => comboAttack(3),
+  12: () => comboAttack(4),
 };
 
 export const mainController = async () => {
@@ -41,7 +46,7 @@ export const mainController = async () => {
 
     // колючки пикана
     if (sessionStore.permissions.isAdmin) {
-      if (monster.cat === 2 && monster.id === 331 && sessionStore.opponentMonster.lvl > 90) return comboAttack();
+      // if (monster.cat === 2 && monster.id === 331 && sessionStore.opponentMonster.lvl > 90) return comboAttack();
       // if (monster.id === 261) return comboAt(1);
     }
 

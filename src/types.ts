@@ -43,6 +43,23 @@ export type Monster = {
   cat: number;
 };
 
+export type ComboStep =
+  | {
+      type: "swap";
+      id: number;
+    }
+  | {
+      type: "attack";
+      id: number;
+      status: number;
+      attempts: number;
+    };
+
+interface ComboConfig {
+  steps: ComboStep[];
+  isHeal: boolean;
+}
+
 export interface UserSettings {
   isDarkTheme: boolean;
 
@@ -93,4 +110,5 @@ export interface UserSettings {
     usePay: boolean;
     useCandy: boolean;
   };
+  combo: Record<number, ComboConfig>;
 }

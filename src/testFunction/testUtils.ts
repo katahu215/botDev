@@ -1,10 +1,4 @@
-import { Attack } from "../game/Attack";
-import { heal } from "../game/heal";
-import { swap } from "../game/swap";
-import { handleActiveBattle } from "../utils/handleActiveBattle";
-import { log } from "../utils/logger";
 import { delayGo, delayInterface } from "../utils/sleep";
-import { sessionStore } from "../utils/store";
 
 import { waitForResponse } from "../utils/websocket";
 
@@ -66,54 +60,4 @@ const toggleTeam = async (close?: boolean) => {
   if (close) button.click();
 
   return result?.object;
-};
-
-export const comboAttack = async () => {
-  if (!(await swap(13831569))) return false;
-
-  for (let i = 0; i < 5; i++) {
-    if (!(await Attack({ targetAttack: "Отравление", attempts: 1, combo: true }))) return false;
-    if (sessionStore.opponentMonster.status[13]) break; // 13 отравлен
-    if (i === 4) return false;
-  }
-  if (!(await Attack({ targetAttack: "Отдых", isHeal: true }))) return false;
-};
-
-export const combo: any = {
-  1: {
-    steps: [
-      { type: "swap", id: "17153595", attempts: 1 }, /// attempts - неиспольуется в swap
-      { type: "attack", id: 1, attempts: 1 }, // id - number | string атак
-    ],
-    isHeal: true,
-  },
-};
-
-const runSteps = async (steps: any) => {
-  for (const step of steps) {
-    switch (step.type) {
-      case "swap": {
-        const ok = await swap(step.id);
-        if (!ok) return false;
-        break;
-      }
-      case "attack":
-        await Attack({ targetAttack: step.id, attempts: step.attempts, combo: true });
-        break;
-      default:
-        log(`Неизвестный тип шага: ${(step as { type: string }).type}`);
-        return false;
-    }
-  }
-  return true;
-};
-export const comboAt = async (numberCombo: number) => {
-  const def = combo[numberCombo];
-  if (!def) return log(`Комбо не найдено: ${numberCombo}`);
-
-  const completed = await runSteps(def.steps);
-
-  if (!completed && !sessionStore.isBattleFinished) return handleActiveBattle(); /// бой еще идет
-
-  if (def.isHeal) return heal();
 };

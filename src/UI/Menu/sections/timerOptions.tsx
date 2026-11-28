@@ -30,7 +30,7 @@ export const getTimerOptions = () => [
             Стоп через:
           </Button>
         </div>
-        <Button class="Button Item cn" style={{ color: "var(--color-prime)", "margin-top": "0.25rem" }} onClick={() => shutdownGame()}>
+        <Button class="Item cn prime" style={{ "margin-top": "0.25rem" }} onClick={() => shutdownGame()}>
           Использовать
         </Button>
       </>

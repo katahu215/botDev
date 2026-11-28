@@ -11,7 +11,7 @@ export const getAutoItemOptions = () => [
       <div class="List">
         <RadioGroup options={optionsRadioGroup.items} value={settingsStore.automation.autoItemId} name="skillWeather" onChange={(val) => setSettingsStore("automation", { autoItemId: Number(val) })} />
 
-        <Button class="Button Item cn" style={{ color: "var(--color-prime)", "margin-top": "0.25rem" }} onClick={() => autoItem()}>
+        <Button class="Item cn prime" style={{ "margin-top": "0.25rem" }} onClick={() => autoItem()}>
           Использовать
         </Button>
       </div>

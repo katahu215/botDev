@@ -33,6 +33,10 @@ const categories: Category[] = [
   { id: 6, title: "Атака 2" },
   { id: 7, title: "Атака 3" },
   { id: 8, title: "Атака 4" },
+  { id: 9, title: "Комбо 1" },
+  { id: 10, title: "Комбо 2" },
+  { id: 11, title: "Комбо 3" },
+  { id: 12, title: "Комбо 4" },
 ] as const;
 
 const openSubMonsterMenu = (monsterId: number) => {
@@ -116,9 +120,7 @@ const Search = () => {
     const query = searchQuery().trim().toLowerCase();
     if (!query) return [];
 
-    return Object.values(monstersStore).filter(
-      (monster) => monster.name.toLowerCase().includes(query) || String(monster.id).includes(query),
-    );
+    return Object.values(monstersStore).filter((monster) => monster.name.toLowerCase().includes(query) || String(monster.id).includes(query));
   });
 
   const handleSelectMonster = (monsterId: number) => {
@@ -130,12 +132,7 @@ const Search = () => {
 
   return (
     <div class="Search">
-      <Input
-        class={buildClassName(hasQuery() && "search")}
-        value={searchQuery()}
-        onInput={setSearchQuery}
-        placeholder="Имя или номер монстра..."
-      />
+      <Input class={buildClassName(hasQuery() && "search")} value={searchQuery()} onInput={setSearchQuery} placeholder="Имя или номер монстра..." />
       <Transition isOpen={hasQuery()}>
         <div class="result custom-scroll">
           <Show when={searchResults().length === 0}>

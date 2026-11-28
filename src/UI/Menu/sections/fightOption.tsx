@@ -4,6 +4,8 @@ import Confirm from "../../Component/Confirm";
 import { modalService } from "../../Component/modalService";
 import RadioGroup from "../../Component/Radio";
 
+const currentAttackLabel = () => optionsRadioGroup.attackSkill.find((i) => i.value === settingsStore.battle.attackSkillId)?.label ?? "";
+
 export const getFightOptions = (pushScreen: (id: number) => void) => [
   {
     id: 1,
@@ -11,8 +13,8 @@ export const getFightOptions = (pushScreen: (id: number) => void) => [
     children: (
       <>
         <div class="List">
-          <Button class="Item" onClick={() => pushScreen(2)} iconName="list">
-            Выбор атаки
+          <Button class="Item" value={currentAttackLabel()} onClick={() => pushScreen(2)} iconName="list">
+            Атаки
           </Button>
         </div>
 

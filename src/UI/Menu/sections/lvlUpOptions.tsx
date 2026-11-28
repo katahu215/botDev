@@ -4,6 +4,8 @@ import Confirm from "../../Component/Confirm";
 import { modalService } from "../../Component/modalService";
 import RadioGroup from "../../Component/Radio";
 
+const currentAttackLabel = () => optionsRadioGroup.lvlUpSkill.find((i) => i.value === settingsStore.leveling.skillId)?.label ?? "";
+
 export const getLvlUpOptions = (pushScreen: (id: number) => void) => [
   {
     id: 20,
@@ -50,7 +52,7 @@ export const getLvlUpOptions = (pushScreen: (id: number) => void) => [
           </Button>
         </div>
         <div class="List">
-          <Button class="Item" onClick={() => pushScreen(21)} iconName="list">
+          <Button class="Item" value={currentAttackLabel()} onClick={() => pushScreen(21)} iconName="list">
             Выбор атаки
           </Button>
         </div>

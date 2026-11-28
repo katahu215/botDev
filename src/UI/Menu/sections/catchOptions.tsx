@@ -6,6 +6,11 @@ import { modalService } from "../../Component/modalService";
 import RadioGroup from "../../Component/Radio";
 import Switcher from "../../Component/Switcher";
 
+const currentWeatherLabel = () => optionsRadioGroup.skillWeather.find((i) => i.value === settingsStore.catch.weatherSkillId)?.label ?? "";
+const currentAttackLabel = () => optionsRadioGroup.skillCatch.find((i) => i.value === settingsStore.catch.skillId)?.label ?? "";
+const currentStatusLabel = () => optionsRadioGroup.skillStatus.find((i) => i.value === settingsStore.catch.statusSkillId)?.label ?? "";
+const currentMonsterBallLabel = () => optionsRadioGroup.monsterBall.find((i) => i.value === settingsStore.catch.ballId)?.label ?? "";
+
 export const getCatchOptions = (pushScreen: (id: number) => void) => [
   {
     id: 30,
@@ -14,18 +19,18 @@ export const getCatchOptions = (pushScreen: (id: number) => void) => [
       <>
         <div class="secondary-text">При ловле Эни, Ино или Сенс стартовый монстр с Насмешкой.</div>
         <div class="List">
-          <Button class="Item" onClick={() => pushScreen(31)} iconName="list">
+          <Button class="Item" value={currentWeatherLabel()} onClick={() => pushScreen(31)} iconName="list">
             Погодные атаки
           </Button>
-          <Button class="Item" onClick={() => pushScreen(32)} iconName="list">
+          <Button class="Item" value={currentAttackLabel()} onClick={() => pushScreen(32)} iconName="list">
             Основные атаки
           </Button>
-          <Button class="Item" onClick={() => pushScreen(33)} iconName="list">
+          <Button class="Item" value={currentStatusLabel()} onClick={() => pushScreen(33)} iconName="list">
             Статусные атаки
           </Button>
         </div>
         <div class="List">
-          <Button class="Item" onClick={() => pushScreen(34)} iconName="pokeball">
+          <Button class="Item" value={currentMonsterBallLabel()} onClick={() => pushScreen(34)} iconName="pokeball">
             Монстробол
           </Button>
           <Button class="Item" onClick={() => pushScreen(35)} iconName="venus-mars">

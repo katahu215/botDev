@@ -48,43 +48,44 @@ const mergeMonsters = (userMonsters: Record<string, any> | undefined | null) => 
 
   return { merged, hasMissing };
 };
+const mergeSettings = (userSettings: Record<string, any> | undefined | null) => {
+  const defaults = defaultSettings as Record<string, any>;
+  const merged: Record<string, any> = {};
+  let hasMissing = false;
+  let hasExtra = false;
+
+  for (const [key, defaultValue] of Object.entries(defaults)) {
+    if (userSettings?.[key] !== undefined) {
+      merged[key] = userSettings[key];
+    } else {
+      merged[key] = defaultValue;
+      hasMissing = true;
+    }
+  }
+
+  for (const key of Object.keys(userSettings ?? {})) {
+    if (defaults[key] === undefined) {
+      hasExtra = true;
+      break;
+    }
+  }
+
+  return { merged, hasMissing, hasExtra };
+};
 
 const syncData = async (uid: string, record: any) => {
   if (record.setting) {
-    const userSettings = record.setting;
-    const defaultEntries = Object.entries(defaultSettings);
-    const mergedSettings: Record<string, any> = {};
-    let hasMissingFields = false;
-
-    for (let i = 0; i < defaultEntries.length; i++) {
-      const [key, defaultValue] = defaultEntries[i];
-      if (userSettings[key] !== undefined) {
-        mergedSettings[key] = userSettings[key];
-      } else {
-        mergedSettings[key] = defaultValue;
-        hasMissingFields = true;
-      }
-    }
-
-    const userKeys = Object.keys(userSettings);
-    let hasExtraFields = false;
-    for (let i = 0; i < userKeys.length; i++) {
-      const key = userKeys[i];
-      if ((defaultSettings as Record<string, any>)[key] === undefined) {
-        hasExtraFields = true;
-        break;
-      }
-    }
+    const { merged, hasMissing, hasExtra } = mergeSettings(record.setting);
 
     setSessionStore("permissions", {
       isVip: Boolean(record.is_vip),
       isAdmin: Boolean(record.is_admin),
     });
-    setSettingsStore(mergedSettings as any);
+    setSettingsStore(merged as any);
 
-    if (hasMissingFields || hasExtraFields) {
+    if (hasMissing || hasExtra) {
       updateDoc(doc(db, "users", uid), {
-        setting: unwrap(mergedSettings),
+        setting: unwrap(merged),
       }).catch((err) => console.error("Не удалось синхронизировать настройки с базой:", err));
     }
   }
@@ -99,7 +100,6 @@ const syncData = async (uid: string, record: any) => {
       }).catch((err) => console.error("Не удалось синхронизировать монстров с базой:", err));
     }
   } else {
-    // если у юзера вообще нет поля monster — заливаем весь дефолт
     setMonstersStore(defaultMonsters);
     updateDoc(doc(db, "users", uid), {
       monster: defaultMonsters,
